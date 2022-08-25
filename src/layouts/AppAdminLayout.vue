@@ -4,6 +4,7 @@
       default-active="2"
       class="el-menu-vertical-demo"
       :collapse="isCollapse"
+      unique-opened='true'
       router
     >
       <el-menu-item index="/home">
@@ -17,6 +18,7 @@
         </template>
         <el-menu-item-group>
           <el-menu-item index="/settings/regulations">條文管理</el-menu-item>
+          <el-menu-item index="/settings/visits">訪視表條文管理</el-menu-item>
           <el-menu-item index="/settings/categories">
             檢核大項主檔
           </el-menu-item>
@@ -37,8 +39,12 @@
           <span>報表管理</span>
         </template>
         <el-menu-item-group>
-          <el-menu-item index="/reports/ghp">GHP報表</el-menu-item>
           <el-menu-item index="/reports/daily">日報表</el-menu-item>
+          <el-menu-item index="/reports/ghp">GHP報表</el-menu-item>
+          <el-menu-item index="/reports/visit">訪視表報表</el-menu-item>
+          <el-menu-item index="/reports/productTemperature">成品溫度報表</el-menu-item>
+          <el-menu-item index="/reports/temperatureAndHumidity">庫房、食材、檢體保存溫濕度報表</el-menu-item>
+          <el-menu-item index="/reports/tablewareInspection">餐具檢驗報表</el-menu-item>
         </el-menu-item-group>
       </el-sub-menu>
       <el-sub-menu index="3">
@@ -70,7 +76,7 @@
           icon="DArrowLeft"
           @click="isCollapse = !false"
         />
-      </div>
+      </div>  
     </el-menu>
     <el-container>
       <el-header>
@@ -132,7 +138,7 @@ const handleLogout = async (e) => {
 body {
   margin: 0;
   .layout-container-demo {
-    height: 98vh;
+    height: 99vh;
     .el-menu-vertical-demo {
       border-right: 1px solid #e5eaf3;
 
@@ -175,6 +181,7 @@ body {
 }
 
 .el-menu-vertical-demo:not(.el-menu--collapse) {
-  width: 200px;
+  min-width: 300px;
 }
+
 </style>

@@ -401,4 +401,13 @@ const handlePageChange = (p) => {
   height: 50vh;
   padding: 5px;
 }
+
+@media screen and (max-width: 1080px){
+  :deep(.el-transfer-panel) {
+    width: 25vw;
+  }
+  :deep(.el-input__wrapper) {
+    width: 20vw;
+  }
+}
 </style>

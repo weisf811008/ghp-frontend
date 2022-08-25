@@ -2,9 +2,9 @@
   <el-card class="box-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <h2>條文管理</h2>
+        <h2>訪視表條文管理</h2>
         <el-button @click="() => (showCreateDialog = true)" icon="Plus">
-          新增條文
+          新增訪視表條文
         </el-button>
       </div>
     </template>
@@ -23,18 +23,17 @@
         width="170"
       />
       <el-table-column
-        label="類別序號"
+        label="編號"
         prop="code"
         fixed
         align="center"
         width="100"
       />
       <el-table-column
-        label="食品良好衛生規範法規GHP檢查"
+        label="訪視項目"
         prop="description"
         fixed
       />
-
       <el-table-column label="操作" align="center" width="200">
         <template #default="scope">
           <el-button
@@ -68,7 +67,7 @@
   <el-dialog
     ref="createDialogRef"
     v-model="showCreateDialog"
-    title="新增條文"
+    title="新增訪視表條文"
     :before-close="handleCloseCreateDialog"
   >
     <el-form
@@ -86,22 +85,19 @@
           v-model="createData.class"
           placeholder="選擇類別"
         >
-          <el-option label="食品業者一般性規定" value="食品業者一般性規定" />
-          <el-option
-            label="餐飲與即時熟食業者專業性規定"
-            value="餐飲與即時熟食業者專業性規定"
-          />
+          <el-option label="衛生訪視內容" value="衛生訪視內容" />
+          
         </el-select>
       </el-form-item>
-      <el-form-item label="類別序號" prop="code">
-        <el-input v-model="createData.code" placeholder="請輸入類別序號" />
+      <el-form-item label="編號" prop="code">
+        <el-input v-model="createData.code" placeholder="請輸入編號" />
       </el-form-item>
-      <el-form-item label="食品良好衛生規範法規GHP檢查" prop="description">
+      <el-form-item label="訪視項目" prop="description">
         <el-input
           v-model="createData.description"
           rows="5"
           type="textarea"
-          placeholder="請輸入食品良好衛生規範法規GHP檢查內容"
+          placeholder="請輸入訪視項目"
         />
       </el-form-item>
     </el-form>
@@ -121,7 +117,7 @@
   <el-dialog
     ref="updateDialogRef"
     v-model="showUpdateDialog"
-    title="修改條文"
+    title="修改訪視表條文"
     :before-close="handleCloseUpdateDialog"
   >
     <el-form
@@ -139,22 +135,18 @@
           v-model="updateData.class"
           placeholder="選擇類別"
         >
-          <el-option label="食品業者一般性規定" value="食品業者一般性規定" />
-          <el-option
-            label="餐飲與即時熟食業者專業性規定"
-            value="餐飲與即時熟食業者專業性規定"
-          />
+          <el-option label="衛生訪視內容" value="衛生訪視內容" />
         </el-select>
       </el-form-item>
-      <el-form-item label="類別序號" prop="code">
-        <el-input v-model="updateData.code" placeholder="請輸入類別序號" />
+      <el-form-item label="編號" prop="code">
+        <el-input v-model="updateData.code" placeholder="請輸入編號" />
       </el-form-item>
-      <el-form-item label="食品良好衛生規範法規GHP檢查" prop="description">
+      <el-form-item label="訪視項目" prop="description">
         <el-input
           v-model="updateData.description"
           rows="5"
           type="textarea"
-          placeholder="請輸入食品良好衛生規範法規GHP檢查內容"
+          placeholder="請輸入訪視項目"
         />
       </el-form-item>
     </el-form>
@@ -207,18 +199,18 @@ const updateData = ref({
 })
 
 const rules = reactive({
-  class: [
-    { required: true, message: '此欄位不得為空', trigger: ['blur', 'change'] },
-    { max: 50, message: '最多50個字元' },
-  ],
-  code: [
-    { required: true, message: '此欄位不得為空', trigger: 'blur' },
-    { max: 5, message: '最多5個字元' },
-  ],
-  description: [
-    { required: true, message: '此欄位不得為空', trigger: 'blur' },
-    { max: 4000, message: '最多4000個字元' },
-  ],
+  // class: [
+  //   { required: true, message: '此欄位不得為空', trigger: ['blur', 'change'] },
+  //   { max: 50, message: '最多50個字元' },
+  // ],
+  // code: [
+  //   { required: true, message: '此欄位不得為空', trigger: 'blur' },
+  //   { max: 5, message: '最多5個字元' },
+  // ],
+  // description: [
+  //   { required: true, message: '此欄位不得為空', trigger: 'blur' },
+  //   { max: 4000, message: '最多4000個字元' },
+  // ],
 })
 
 const pageSize = ref(10)
@@ -378,5 +370,4 @@ const handlePageChange = (p) => {
     }
   }
 }
-
 </style>

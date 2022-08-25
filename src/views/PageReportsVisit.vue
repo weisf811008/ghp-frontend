@@ -2,7 +2,7 @@
   <el-card class="box-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <h2>GHP報表</h2>
+        <h2>訪視表報表</h2>
         <div class="block">
           <span class="demonstration">請選擇日期區間</span>
           <el-date-picker
@@ -29,20 +29,20 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="類別序號"
+        label="類別"
         fixed
         align="center"
         prop="code"
         width="100"
       />
       <el-table-column
-        label="類別"
+        label="編號"
         fixed
         align="center"
         prop="class"
         width="170"
       />
-      <el-table-column label="食品良好衛生規範法規GHP檢查" fixed prop="description" min-width="400" />
+      <el-table-column label="訪視項目" fixed prop="description" min-width="400" />
       <el-table-column
         label="合格次數"
         align="center"
@@ -199,8 +199,8 @@ const handleChange = () => {
 const handleDownload = () => {
   const rows = regulations.value.map((reg, i) => ({
     類別: reg.class,
-    序號: reg.code,
-    食品良好衛生規範法規GHP檢查: reg.description,
+    編號: reg.code,
+    訪視項目: reg.description,
     合格次數: reports.value[reg.code] ? reports.value[reg.code].pass.length : 0,
     不合格次數: reports.value[reg.code]
       ? reports.value[reg.code].fail.length
@@ -223,12 +223,12 @@ const handleDownload = () => {
       '桃園市大竹國民小學',
       '',
       '文件編號',
-      'DCES06',
+      'DCES07',
     ],
     [
       '制定單位',
       '大竹國小',
-      '食品良好衛生規範法規GHP檢查表',
+      '午餐輔導訪視表',
       '',
       '檢查區間',
       '',
@@ -250,6 +250,7 @@ const handleDownload = () => {
   ws['!merges'] = [
     //info rows
     { s: { c: 2, r: 0 }, e: { c: 3, r: 0 } },
+    { s: { c: 2, r: 1 }, e: { c: 3, r: 1 } },
     //header row
     { s: { c: 0, r: 2 }, e: { c: 5, r: 2 } },
     //footer row
@@ -268,9 +269,9 @@ const handleDownload = () => {
   ]
 
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'GHP報表')
+  XLSX.utils.book_append_sheet(wb, ws, '訪視表報表')
 
-  XLSX.writeFile(wb, 'GHP報表.xlsx')
+  XLSX.writeFile(wb, '訪視表報表.xlsx')
 }
 
 const handlePageChange = (p) => {

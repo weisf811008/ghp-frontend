@@ -1,5 +1,4 @@
 import axios from 'axios'
-import router from '../routers'
 
 export const request = axios.create({
   baseURL: '/api',
@@ -11,11 +10,10 @@ export const request = axios.create({
 request.interceptors.response.use(
   res => res,
   err => {
-    console.log(err.response.data)
-    // if (err.response.status === 401) {
-    //   // const router = useRouter()
-    //   return router.push({ name: 'Login' })
+    // if (axios.isAxiosError(err) && err.response.status === 401) {
+    //   return
     // }
+    console.error(err.response.data)
     return Promise.reject(err)
   }
 )

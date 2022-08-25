@@ -35,8 +35,8 @@
         prop="category"
         width="180"
       />
-      <el-table-column label="編號" prop="no" width="90" />
-      <el-table-column label="檢核細項" prop="item" />
+      <el-table-column label="編號" fixed prop="no" width="90" />
+      <el-table-column label="檢核細項" fixed prop="item" min-width="400" />
       <el-table-column
         v-for="(j, i) in getPeriodInDays"
         :label="format(addDays(dates[0], i), 'MM/dd')"
@@ -50,7 +50,7 @@
             :class="{
               pass: getStatus(report[scope.row.id], i) === 'pass',
               fail: getStatus(report[scope.row.id], i) === 'fail',
-              others: getStatus(report[scope.row.id], i) === 'others',
+              others: getStatus(report[scope.row.id], i) === 'others'
             }"
           >
             {{ getStatusLabel(report[scope.row.id], i) }}
@@ -75,7 +75,7 @@ import {
   subDays,
   startOfDay,
   format,
-  differenceInDays,
+  differenceInDays
 } from 'date-fns'
 import * as XLSX from 'xlsx'
 import { useItemStore } from '../stores/items'
@@ -104,7 +104,7 @@ const shortcuts = [
       const start = new Date()
       start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
       return [start, end]
-    },
+    }
   },
   {
     text: '上個月',
@@ -113,7 +113,7 @@ const shortcuts = [
       const start = new Date()
       start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
       return [start, end]
-    },
+    }
   },
   {
     text: '前三個月',
@@ -122,15 +122,15 @@ const shortcuts = [
       const start = new Date()
       start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
       return [start, end]
-    },
-  },
+    }
+  }
 ]
-const disabledDate = (time) => time.getTime() > Date.now()
+const disabledDate = time => time.getTime() > Date.now()
 
 const statusMap = {
   pass: '✓',
   fail: '不合格',
-  others: '其他',
+  others: '其他'
 }
 
 //page
@@ -169,7 +169,7 @@ onMounted(() => {
   getReport()
 })
 
-const handlePageChange = (p) => {
+const handlePageChange = p => {
   page.value = p
 }
 
@@ -190,31 +190,36 @@ const handleDownload = () => {
       '',
       '文件編號',
       '',
-      'DCES01',
+      'DCES01'
     ],
-    ['制定單位', '大竹國小', '每日衛生管理日誌', '', '', '', '版次', '', '1.0'],
-    [''],
     [
-      '區域',
-      '檢查項目',
+      '制定單位',
+      '大竹國小',
+      `每日衛生管理日誌(民國${format(dates.value[0], 'yyyy') - 1911}年）`,
       '',
-      ...dateArr.map((d) => format(d, 'MM/dd')),
-      '學校覆核',
+      '',
+      '',
+      '版次',
+      '',
+      '1.0'
     ],
+    [''],
+    ['區域', '檢查項目', '', ...dateArr.map(d => format(d, 'MM/dd')), '備註'],
     ...items.value.map((it, i) => {
       return [
         it.category,
         it.item,
         '',
-        ...dateArr.map((d) => {
+        ...dateArr.map(d => {
           const dateStr = format(d, f)
           if (!report.value[it.id] || !report.value[it.id][dateStr]) {
             return ''
           }
           return statusMap[report.value[it.id][dateStr]]
-        }),
+        })
       ]
     }),
+    ['衛生管理人員', '', '', '營養師', '', '', '', '', '單位主管']
   ])
 
   ws['!merges'] = [
@@ -227,13 +232,17 @@ const handleDownload = () => {
     { s: { c: 8, r: 1 }, e: { c: 9, r: 1 } },
     // empty row
     { s: { c: 0, r: 2 }, e: { c: 9, r: 2 } },
-    // header
+    // header rows
     { s: { c: 1, r: 3 }, e: { c: 2, r: 3 } },
-    // data
+    // data rows
     ...items.value.map((v, i) => ({
       s: { c: 1, r: 4 + i },
-      e: { c: 2, r: 4 + i },
+      e: { c: 2, r: 4 + i }
     })),
+    //footer row
+    { s: { c: 0, r: 4 + items.value.length }, e: { c: 2, r: 4 + items.value.length }},
+    { s: { c: 3, r: 4 + items.value.length }, e: { c: 7, r: 4 + items.value.length }},
+    { s: { c: 8, r: 4 + items.value.length }, e: { c: 9, r: 4 + items.value.length }}
   ]
   ws['!cols'] = [
     { wch: 10 },
@@ -245,13 +254,13 @@ const handleDownload = () => {
     { wch: 6 },
     { wch: 6 },
     { wch: 6 },
-    { wch: 10 },
+    { wch: 10 }
   ]
 
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'daily')
+  XLSX.utils.book_append_sheet(wb, ws, '日報表')
 
-  XLSX.writeFile(wb, 'daily_report.xlsx')
+  XLSX.writeFile(wb, '日報表.xlsx')
 }
 </script>
 

@@ -2,7 +2,7 @@
   <el-card class="box-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <h2>GHP報表</h2>
+        <h2>庫房、食材、檢體保存溫濕度報表</h2>
         <div class="block">
           <span class="demonstration">請選擇日期區間</span>
           <el-date-picker
@@ -22,96 +22,26 @@
         </div>
       </div>
     </template>
-    <el-table :data="regulations" table-layout="auto">
-      <el-table-column label="項次" fixed align="center" width="60">
+    <el-table :data="tableData" style="width: 100%">
+      <el-table-column label="項次"  align="center" width="60">
         <template #default="scope">
           {{ scope.$index + 1 }}
         </template>
       </el-table-column>
-      <el-table-column
-        label="類別序號"
-        fixed
-        align="center"
-        prop="code"
-        width="100"
-      />
-      <el-table-column
-        label="類別"
-        fixed
-        align="center"
-        prop="class"
-        width="170"
-      />
-      <el-table-column label="食品良好衛生規範法規GHP檢查" fixed prop="description" min-width="400" />
-      <el-table-column
-        label="合格次數"
-        align="center"
-        prop="status"
-        width="100"
-      >
-        <template #default="scope">
-          {{
-            reports[scope.row.code] ? reports[scope.row.code].pass.length : 0
-          }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="不合格次數"
-        align="center"
-        prop="status"
-        width="100"
-      >
-        <template #default="scope">
-          {{
-            reports[scope.row.code] ? reports[scope.row.code].fail.length : 0
-          }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="其他次數"
-        align="center"
-        prop="status"
-        width="100"
-      >
-        <template #default="scope">
-          {{
-            reports[scope.row.code] ? reports[scope.row.code].others.length : 0
-          }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        type="expand"
-        label="詳細說明"
-        align="center"
-        width="100"
-      >
-        <template #default="scope">
-          <el-descriptions>
-            <el-descriptions-item label="合格項目：">
-              {{
-                reports[scope.row.code]
-                  ? reports[scope.row.code].pass.join(', ')
-                  : ''
-              }}
-            </el-descriptions-item>
-            <el-descriptions-item label="不合格項目：">
-              {{
-                reports[scope.row.code]
-                  ? reports[scope.row.code].fail.join(', ')
-                  : ''
-              }}
-            </el-descriptions-item>
-            <el-descriptions-item label="其他項目：">
-              {{
-                reports[scope.row.code]
-                  ? reports[scope.row.code].others.join(', ')
-                  : ''
-              }}
-            </el-descriptions-item>
-          </el-descriptions>
-        </template>
-      </el-table-column>
-    </el-table>
+    <el-table-column prop="date" label="日期" align="center" />
+    <el-table-column prop="date" label="星期" align="center" />
+    <el-table-column label="庫房溫濕度" align="center" >
+      <el-table-column prop="name" label="溫度(°C)" align="center"/>
+      <el-table-column prop="name" label="濕度(%)" align="center"/>
+    </el-table-column>
+    <el-table-column label="食材冰箱" align="center">
+      <el-table-column prop="name" label="冷藏溫度(°C)" align="center"/>
+      <el-table-column prop="name" label="冷凍溫度(°C)" align="center"/>
+    </el-table-column>
+    <el-table-column label="檢體冰箱" align="center">
+      <el-table-column prop="name" label="冷藏溫度(°C)" align="center"/>
+    </el-table-column>
+  </el-table>
     <!-- <el-pagination
       class="pages"
       layout="prev, pager, next"
@@ -198,22 +128,22 @@ const handleChange = () => {
 
 const handleDownload = () => {
   const rows = regulations.value.map((reg, i) => ({
-    類別: reg.class,
-    序號: reg.code,
-    食品良好衛生規範法規GHP檢查: reg.description,
-    合格次數: reports.value[reg.code] ? reports.value[reg.code].pass.length : 0,
-    不合格次數: reports.value[reg.code]
-      ? reports.value[reg.code].fail.length
-      : 0,
-    其他次數: reports.value[reg.code]
-      ? reports.value[reg.code].others.length
-      : 0,
-    不合格日期及狀況: reports.value[reg.code]
-      ? reports.value[reg.code].fail.join(', ')
-      : '',
-    合格日期: reports.value[reg.code]
-      ? reports.value[reg.code].pass.join(', ')
-      : '',
+    // 類別: reg.class,
+    // 序號: reg.code,
+    // 食品良好衛生規範法規GHP檢查: reg.description,
+    // 合格次數: reports.value[reg.code] ? reports.value[reg.code].pass.length : 0,
+    // 不合格次數: reports.value[reg.code]
+    //   ? reports.value[reg.code].fail.length
+    //   : 0,
+    // 其他次數: reports.value[reg.code]
+    //   ? reports.value[reg.code].others.length
+    //   : 0,
+    // 不合格日期及狀況: reports.value[reg.code]
+    //   ? reports.value[reg.code].fail.join(', ')
+    //   : '',
+    // 合格日期: reports.value[reg.code]
+    //   ? reports.value[reg.code].pass.join(', ')
+    //   : '',
   }))
 
   const ws = XLSX.utils.aoa_to_sheet([
@@ -222,24 +152,56 @@ const handleDownload = () => {
       format(new Date(), 'yyyyMMdd'),
       '桃園市大竹國民小學',
       '',
+      '',
       '文件編號',
-      'DCES06',
+      'DCES03',
     ],
     [
       '制定單位',
       '大竹國小',
-      '食品良好衛生規範法規GHP檢查表',
+      `庫房、食材、檢體保存溫度濕度紀錄表（民國${format(dates.value[0], 'yyyy')-1911}年）`,
       '',
-      '檢查區間',
+      '',
+      '月份',
+      `${format(dates.value[0], 'MM')}`,
+    ],
+    [],
+    [
+      '日期',
+      '星期',
+      '庫房溫濕度',
+      '',
+      '食材冰箱',
+      '',
+      '檢體冰箱'
+    ],
+    [
+      '',
+      '',
+      '溫度(°C)',
+      '濕度(%)',
+      '冷藏溫度(°C)',
+      '冷凍溫度(°C)',
+      '冷藏溫度(°C)'
+    ],
+    [
+      '日期',
+      '異常項目',
+      '異常說明',
+      '',
+      '',
+      '',
       '',
     ],
-    // [
-    //   '衛生管理人員',
-    //   '',
-    //   '營養師',
-    //   '單位主管',
-    //   '',
-    // ]
+    [
+      '衛生管理人員',
+      '',
+      '',
+      '營養師',
+      '',
+      '單位主管',
+      '',
+    ]
   ])
 
   XLSX.utils.sheet_add_json(ws, rows, {
@@ -249,28 +211,36 @@ const handleDownload = () => {
 
   ws['!merges'] = [
     //info rows
-    { s: { c: 2, r: 0 }, e: { c: 3, r: 0 } },
-    //header row
-    { s: { c: 0, r: 2 }, e: { c: 5, r: 2 } },
-    //footer row
-    // { s: { c: 0, r: regulations.value.length }, e: { c: 1, r: regulations.value.length } },
-    // { s: { c: 3, r: regulations.value.length }, e: { c: 4, r: regulations.value.length } },
+    { s: { c: 2, r: 0 }, e: { c: 4, r: 0 } },
+    { s: { c: 2, r: 1 }, e: { c: 4, r: 1 } },
+    // empty row
+    { s: { c: 0, r: 2 }, e: { c: 6, r: 2 } },
+    //header
+    { s: { c: 0, r: 3 }, e: { c: 0, r: 4 } },
+    { s: { c: 1, r: 3 }, e: { c: 1, r: 4 } },
+    { s: { c: 2, r: 3 }, e: { c: 3, r: 3 } },
+    { s: { c: 4, r: 3 }, e: { c: 5, r: 3 } },
+    //abnormal rows
+    { s: { c: 2, r: 5 + dates.value.length }, e: { c: 6, r: 5 + dates.value.length } },
+    //footer
+    { s: { c: 0, r: 6 + dates.value.length}, e: { c: 2, r: 6 + dates.value.length} },
+    { s: { c: 3, r: 6 + dates.value.length}, e: { c: 4, r: 6 + dates.value.length} },
+    { s: { c: 5, r: 6 + dates.value.length}, e: { c: 6, r: 6 + dates.value.length} },
   ]
   ws['!cols'] = [
     { wch: 10 },
     { wch: 10 },
-    { wch: 36 },
-    { wch: 10 },
-    { wch: 10 },
-    { wch: 10 },
-    { wch: 18 },
-    { wch: 10 },
+    { wch: 15 },
+    { wch: 15 },
+    { wch: 15 },
+    { wch: 15 },
+    { wch: 15 },
   ]
 
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'GHP報表')
+  XLSX.utils.book_append_sheet(wb, ws, '庫房、食材、檢體保存溫度濕度紀錄報表')
 
-  XLSX.writeFile(wb, 'GHP報表.xlsx')
+  XLSX.writeFile(wb, '庫房、食材、檢體保存溫度濕度紀錄報表.xlsx')
 }
 
 const handlePageChange = (p) => {

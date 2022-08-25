@@ -37,6 +37,16 @@
         </template>
       </el-table-column>
       <el-table-column
+        label="訪視表"
+        prop="needVisitingForm"
+        align="center"
+        width="90"
+      >
+        <template #default="scope">
+          {{ scope.row.needVisitingForm.join(',') }}
+        </template>
+      </el-table-column>
+      <el-table-column
         label="需填資料"
         prop="needToComment"
         align="center"
@@ -46,7 +56,7 @@
           {{ scope.row.needToComment ? '需要' : '不需要' }}
         </template>
       </el-table-column>
-      <el-table-column
+      <!-- <el-table-column
         label="每日衛生管理日誌"
         prop="needJournal"
         align="center"
@@ -55,17 +65,7 @@
         <template #default="scope">
           {{ scope.row.needJournal ? '列入' : '不列入' }}
         </template>
-      </el-table-column>
-      <el-table-column
-        label="訪視表"
-        prop="needVisitingForm"
-        align="center"
-        width="90"
-      >
-        <template #default="scope">
-          {{ scope.row.needVisitingForm ? '列入' : '不列入' }}
-        </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column label="操作" align="center" width="200">
         <template #default="scope">
           <el-button
@@ -180,24 +180,34 @@
           </el-option>
         </el-select>
       </el-form-item>
+      <el-form-item label="訪視表條文" prop="needVisitingForms">
+        <el-select
+          class="formSelect"
+          v-model="createData.needVisitingForms"
+          multiple
+          placeholder="請選擇訪視表條文"
+        >
+          <el-option
+            v-for="needVisitingForm in needVisitingForms"
+            :value="needVisitingForm.code"
+            :label="needVisitingForm.code"
+            :key="`select-needVisitingForm-${needVisitingForm.code}`"
+          >
+          </el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="需填資料" prop="needToComment">
         <el-radio-group v-model="createData.needToComment">
           <el-radio :label="true">需要</el-radio>
           <el-radio :label="false">不需要</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="每日衛生管理日誌" prop="needJournal">
+      <!-- <el-form-item label="每日衛生管理日誌" prop="needJournal">
         <el-radio-group v-model="createData.needJournal">
           <el-radio :label="true">列入</el-radio>
           <el-radio :label="false">不列入</el-radio>
         </el-radio-group>
-      </el-form-item>
-      <el-form-item label="訪視表" prop="needVisitingForm">
-        <el-radio-group v-model="createData.needVisitingForm">
-          <el-radio :label="true">列入</el-radio>
-          <el-radio :label="false">不列入</el-radio>
-        </el-radio-group>
-      </el-form-item>
+      </el-form-item> -->
     </el-form>
     <template #footer>
       <span class="dialog-footer">
@@ -295,24 +305,33 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="訪視表條文" prop="needVisitingForms">
+        <el-select
+          class="formSelect"
+          v-model="updateData.needVisitingForms"
+          multiple
+          placeholder="請選擇訪視表條文"
+        >
+          <el-option
+            v-for="needVisitingForm in needVisitingForms"
+            :value="needVisitingForm.code"
+            :label="needVisitingForm.code"
+            :key="`update-select-needVisitingForm-${needVisitingForm.code}`"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="需填資料" prop="needToComment">
         <el-radio-group v-model="updateData.needToComment">
           <el-radio :label="true">需要</el-radio>
           <el-radio :label="false">不需要</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="每日衛生管理日誌" prop="needJournal">
+      <!-- <el-form-item label="每日衛生管理日誌" prop="needJournal">
         <el-radio-group v-model="updateData.needJournal">
           <el-radio :label="true">列入</el-radio>
           <el-radio :label="false">不列入</el-radio>
         </el-radio-group>
-      </el-form-item>
-      <el-form-item label="訪視表" prop="needVisitingForm">
-        <el-radio-group v-model="updateData.needVisitingForm">
-          <el-radio :label="true">列入</el-radio>
-          <el-radio :label="false">不列入</el-radio>
-        </el-radio-group>
-      </el-form-item>
+      </el-form-item> -->
     </el-form>
     <template #footer>
       <span class="dialog-footer">
@@ -376,9 +395,9 @@ const createData = ref({
   period: '',
   area: '',
   regulations: [],
+  needVisitingForms: [],
   needToComment: true,
-  needJournal: true,
-  needVisitingForm: true,
+  // needJournal: true,
 })
 
 const updateData = ref({
@@ -389,9 +408,9 @@ const updateData = ref({
   period: '',
   area: '',
   regulations: [],
+  needVisitingForms: [],
   needToComment: true,
-  needJournal: true,
-  needVisitingForm: true,
+  // needJournal: true,
 })
 
 const rules = reactive({
@@ -407,10 +426,7 @@ const rules = reactive({
   needToComment: [
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
   ],
-  needJournal: [{ required: true, message: '此欄位不得為空', trigger: 'blur' }],
-  needVisitingForm: [
-    { required: true, message: '此欄位不得為空', trigger: 'blur' },
-  ],
+  needJournal: [{ required: true, message: '此欄位不得為空', trigger: 'blur' }]
 })
 
 const pageSize = ref(10)
@@ -426,7 +442,8 @@ const filterData = () =>
       data.item.includes(search.value) ||
       data.period.includes(search.value) ||
       data.area.includes(search.value) ||
-      data.regulations.some((r) => r.includes(search.value))
+      data.regulations.some((r) => r.includes(search.value)) ||
+      data.needVisitingForms.some((v) => v.includes(search.value))
   ))
 const getFilteredData = computed(() => filterData())
 
@@ -453,9 +470,9 @@ const handleShowUpdateDialog = (row) => {
   updateData.value.period = row.period
   updateData.value.area = row.area
   updateData.value.regulations = row.regulations
+  updateData.value.needVisitingForms = row.needVisitingForms
   updateData.value.needToComment = row.needToComment
-  updateData.value.needJournal = row.needJournal
-  updateData.value.needVisitingForm = row.needVisitingForm
+  // updateData.value.needJournal = row.needJournal
   showUpdateDialog.value = true
 }
 
@@ -465,8 +482,7 @@ const handleCloseCreateDialog = () => {
   createFormRef.value.clearValidate()
   createData.value = {
     needToComment: true,
-    needJournal: true,
-    needVisitingForm: true,
+    // needJournal: true,
   }
 }
 
@@ -488,9 +504,9 @@ const handleCreateItem = (e, formRef) => {
           period: createData.value.period,
           area: createData.value.area,
           regulations: createData.value.regulations,
+          needVisitingForms: createData.value.needVisitingForms,
           needToComment: createData.value.needToComment,
-          needJournal: createData.value.needJournal,
-          needVisitingForm: createData.value.needVisitingForm,
+          // needJournal: createData.value.needJournal,
         }
         await createItem(data)
         handleCloseCreateDialog()
@@ -522,9 +538,9 @@ const handleUpdateItem = (e, formRef) => {
           period: updateData.value.period,
           area: updateData.value.area,
           regulations: updateData.value.regulations,
+          needVisitingForms: updateData.value.needVisitingForms,
           needToComment: updateData.value.needToComment,
-          needJournal: updateData.value.needJournal,
-          needVisitingForm: updateData.value.needVisitingForm,
+          // needJournal: updateData.value.needJournal,
         }
         await updateItem(updateData.value.id, data)
         handleCloseUpdateDialog()
