@@ -1,22 +1,18 @@
 <template>
-  <component :is='layout'>
-    <router-view></router-view>
+  <component :is="layout">
+    <slot />
   </component>
 </template>
 
 <script setup>
-import { ref, watch, markRaw } from 'vue'
+import { computed, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
-import AdminLayout from './AppAdminLayout.vue'
 
 const route = useRoute()
-const layout = ref()
+const defaultLayout = 'AppAdminLayout'
 
-watch(
-  () => route.meta?.layout,
-  (metaLayout) => {
-    layout.value = markRaw(metaLayout || AdminLayout)
-  },
-  { immediate: true }
-)
+const layout = computed(() => {
+  const layout = route.meta?.layout || defaultLayout
+  return defineAsyncComponent(() => import(`./${layout}.vue`))
+})
 </script>
