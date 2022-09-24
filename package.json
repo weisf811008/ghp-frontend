@@ -12,7 +12,7 @@
     "axios": "^0.27.2",
     "chart.js": "^3.8.0",
     "date-fns": "^2.29.1",
-    "element-plus": "^2.2.6",
+    "element-plus": "^2.2.16",
     "pinia": "^2.0.14",
     "sass": "^1.53.0",
     "vue": "^3.2.25",
