@@ -49,7 +49,6 @@
             text
             icon="Delete"
             @click="handleDeleteSchool(scope.row)"
-            width="80px"
           >
             刪除
           </el-button>
@@ -75,7 +74,6 @@
       :model="createData"
       :rules="rules"
       label-width="auto"
-      :label-position="labelPosition"
       size="large"
       status-icon
       hide-required-asterisk
@@ -123,13 +121,9 @@
       :model="updateData"
       :rules="rules"
       label-width="auto"
-      :label-position="labelPosition"
       status-icon
       hide-required-asterisk
     >
-      <el-form-item label="學校代碼" prop="code">
-        <el-input v-model="updateData.code" placeholder="請輸入學校代碼" />
-      </el-form-item>
       <el-form-item label="學校名稱" prop="name">
         <el-input v-model="updateData.name" placeholder="請輸入學校名稱" />
       </el-form-item>
@@ -162,7 +156,7 @@
 </template>
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import { ElMessageBox, ElNotification } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useSchoolStore } from '../stores/school'
 
@@ -173,7 +167,6 @@ const { getSchools, createSchool, updateSchool, deleteSchool } = schoolStore
 
 const search = ref('')
 const size = ref('default')
-const labelPosition = ref('right')
 
 const showCreateDialog = ref(false)
 const showUpdateDialog = ref(false)
@@ -217,14 +210,8 @@ const rules = reactive({
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
     { max: 255, message: '最多255個字元' },
   ],
-  phone: [
-    { required: true, message: '此欄位不得為空', trigger: 'blur' },
-    { max: 50, message: '最多50個字元' },
-  ],
-  url: [
-    { required: true, message: '此欄位不得為空', trigger: 'blur' },
-    { max: 255, message: '最多255個字元' },
-  ],
+  phone: [{ max: 50, message: '最多50個字元' }],
+  url: [{ max: 255, message: '最多255個字元' }],
 })
 
 const pageSize = ref(10)
@@ -257,12 +244,12 @@ onMounted(() => {
 
 const handleShowUpdateDialog = (row) => {
   updateData.value.id = row.id
-  ;(updateData.value.code = row.code),
-    (updateData.value.name = row.name),
-    (updateData.value.city = row.city),
-    (updateData.value.address = row.address),
-    (updateData.value.phone = row.phone),
-    (updateData.value.url = row.url)
+  updateData.value.code = row.code
+  updateData.value.name = row.name
+  updateData.value.city = row.city
+  updateData.value.address = row.address
+  updateData.value.phone = row.phone
+  updateData.value.url = row.url
   showUpdateDialog.value = true
 }
 
@@ -285,16 +272,15 @@ const handleCreateSchool = (e, formRef) => {
       try {
         await createSchool(createData.value)
         handleCloseCreateDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '新增成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '新增失敗',
           type: 'error',
+          message: '新增失敗',
         })
       }
     }
@@ -315,16 +301,15 @@ const handleUpdateSchool = (e, formRef) => {
           url: updateData.value.url,
         })
         handleCloseUpdateDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '修改成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '修改失敗',
           type: 'error',
+          message: '修改失敗',
         })
       }
     }
@@ -340,20 +325,20 @@ const handleDeleteSchool = (row) => {
     .then(async () => {
       try {
         await deleteSchool(row.id)
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '刪除成功',
         })
       } catch (e) {
         console.error(e)
-        ElMessage({
+        ElNotification({
           type: 'error',
           message: '刪除失敗',
         })
       }
     })
     .catch(() => {
-      ElMessage({
+      ElNotification({
         type: 'info',
         message: '取消刪除',
       })
@@ -391,6 +376,6 @@ const handlePageChange = (p) => {
 }
 
 .formSelect {
-  width: 100vw;
+  width: 100%;
 }
 </style>
