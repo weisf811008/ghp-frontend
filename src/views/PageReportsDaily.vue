@@ -4,7 +4,7 @@
       <div class="card-header">
         <h2>日報表</h2>
         <div class="block">
-          <span class="demonstration">請選擇日期區間</span>
+          <span class="selectDate">請選擇日期區間</span>
           <el-date-picker
             v-model="dates"
             type="daterange"
@@ -14,7 +14,7 @@
             start-placeholder="起始日期"
             end-placeholder="結束日期"
             :shortcuts="shortcuts"
-            @change="getReport"
+            @change="getReports"
           />
           <el-button type="primary" @click="handleDownload">
             下載Excel
@@ -48,12 +48,12 @@
         <template #default="scope">
           <span
             :class="{
-              pass: getStatus(report[scope.row.id], i) === 'pass',
-              fail: getStatus(report[scope.row.id], i) === 'fail',
-              others: getStatus(report[scope.row.id], i) === 'others'
+              pass: getStatus(reports[scope.row.id], i) === 'pass',
+              fail: getStatus(reports[scope.row.id], i) === 'fail',
+              others: getStatus(reports[scope.row.id], i) === 'others',
             }"
           >
-            {{ getStatusLabel(report[scope.row.id], i) }}
+            {{ getStatusLabel(reports[scope.row.id], i) }}
           </span>
         </template>
       </el-table-column>
@@ -75,27 +75,31 @@ import {
   subDays,
   startOfDay,
   format,
-  differenceInDays
+  differenceInDays,
 } from 'date-fns'
 import * as XLSX from 'xlsx'
 import { useItemStore } from '../stores/items'
-import { useDailyStore } from '../stores/daily'
+import { useReportDailyStore } from '../stores/reportsDaily'
 
-const daolyStore = useDailyStore()
-const { getReportDaily } = daolyStore
+const reportDailyStore = useReportDailyStore()
+const { getReportDaily } = reportDailyStore
 
 const itemStore = useItemStore()
 const { items } = storeToRefs(itemStore)
 const { getItems } = itemStore
 
-// const form = ref({
-//   details: [],
-// })
-const report = ref({})
+onMounted(() => {
+  getItems()
+  getReports()
+})
+
+const reports = ref({})
 
 //date picker
 const today = startOfDay(new Date())
 const dates = ref([subDays(today, 5), today])
+const f = 'yyyy-MM-dd'
+const formatDate = 'yyyyMMdd'
 const shortcuts = [
   {
     text: '上週',
@@ -104,7 +108,7 @@ const shortcuts = [
       const start = new Date()
       start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
       return [start, end]
-    }
+    },
   },
   {
     text: '上個月',
@@ -113,7 +117,7 @@ const shortcuts = [
       const start = new Date()
       start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
       return [start, end]
-    }
+    },
   },
   {
     text: '前三個月',
@@ -122,58 +126,41 @@ const shortcuts = [
       const start = new Date()
       start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
       return [start, end]
-    }
-  }
+    },
+  },
 ]
-const disabledDate = time => time.getTime() > Date.now()
-
-const statusMap = {
-  pass: '✓',
-  fail: '不合格',
-  others: '其他'
-}
-
-//page
-const pageSize = ref(10)
-const page = ref(1)
-// const getFilteredData = computed(() => filterData())
-
-// const getTableData = computed(() =>
-//   filterData().slice(
-//     (page.value - 1) * pageSize.value,
-//     page.value * pageSize.value
-//   )
-// )
-
-const f = 'yyyy-MM-dd'
-
+const disabledDate = (time) => time.getTime() > Date.now()
 const getPeriodInDays = computed(
   () => differenceInDays(new Date(dates.value[1]), new Date(dates.value[0])) + 1
 )
 
-const getStatus = (data, diff) =>
-  data ? data[format(addDays(dates.value[0], diff), f)] : null
-
-const getStatusLabel = (data, diff) =>
-  getStatus(data, diff) ? statusMap[getStatus(data, diff)] : null
-
-const getReport = async () => {
-  report.value = await getReportDaily(
-    format(dates.value[0], f),
-    format(dates.value[1], f)
+const getReports = async () => {
+  reports.value = await getReportDaily(
+    dates.value[0].toISOString(),
+    dates.value[1].toISOString()
   )
 }
 
-onMounted(() => {
-  getItems()
-  getReport()
-})
-
-const handlePageChange = p => {
-  page.value = p
+const statusMap = {
+  pass: '✓',
+  fail: '不合格',
+  others: '其他',
 }
 
+const getStatus = (data, diff) =>
+  data ? data[format(addDays(dates.value[0], diff), f)] : null
+
+const getStatusLabel = (data, diff) => {
+  const status = getStatus(data, diff)
+  return status ? statusMap[status] : null
+}
+
+//excel download
 const handleDownload = () => {
+  const sheetDate =
+    format(dates.value[0], formatDate) +
+    '~' +
+    format(dates.value[1], formatDate)
   const diff =
     differenceInDays(new Date(dates.value[1]), new Date(dates.value[0])) + 1
   const dateArr = Array(diff)
@@ -183,14 +170,15 @@ const handleDownload = () => {
   const ws = XLSX.utils.aoa_to_sheet([
     [
       '制定日期',
-      format(new Date(), 'yyyyMMdd'),
+      format(new Date(), formatDate),
       '桃園市大竹國民小學',
+      '',
       '',
       '',
       '',
       '文件編號',
       '',
-      'DCES01'
+      'DCES01',
     ],
     [
       '制定單位',
@@ -199,53 +187,72 @@ const handleDownload = () => {
       '',
       '',
       '',
+      '',
       '版次',
       '',
-      '1.0'
+      '1.0',
     ],
     [''],
-    ['區域', '檢查項目', '', ...dateArr.map(d => format(d, 'MM/dd')), '備註'],
+    [
+      '項次',
+      '檢核大項',
+      '檢核細項',
+      '',
+      ...dateArr.map((d) => format(d, 'MM/dd')),
+      '備註',
+    ],
     ...items.value.map((it, i) => {
       return [
+        i + 1,
         it.category,
         it.item,
         '',
-        ...dateArr.map(d => {
+        ...dateArr.map((d) => {
           const dateStr = format(d, f)
-          if (!report.value[it.id] || !report.value[it.id][dateStr]) {
+          if (!reports.value[it.id] || !reports.value[it.id][dateStr]) {
             return ''
           }
-          return statusMap[report.value[it.id][dateStr]]
-        })
+          return statusMap[reports.value[it.id][dateStr]]
+        }),
       ]
     }),
-    ['衛生管理人員', '', '', '營養師', '', '', '', '', '單位主管']
+    ['衛生管理人員', '', '', '營養師', '', '', '', '單位主管', '', ''],
   ])
 
   ws['!merges'] = [
     // info rows
-    { s: { c: 2, r: 0 }, e: { c: 5, r: 0 } },
-    { s: { c: 6, r: 0 }, e: { c: 7, r: 0 } },
-    { s: { c: 8, r: 0 }, e: { c: 9, r: 0 } },
-    { s: { c: 2, r: 1 }, e: { c: 5, r: 1 } },
-    { s: { c: 6, r: 1 }, e: { c: 7, r: 1 } },
-    { s: { c: 8, r: 1 }, e: { c: 9, r: 1 } },
+    { s: { c: 2, r: 0 }, e: { c: 6, r: 0 } },
+    { s: { c: 7, r: 0 }, e: { c: 8, r: 0 } },
+    { s: { c: 9, r: 0 }, e: { c: 10, r: 0 } },
+    { s: { c: 2, r: 1 }, e: { c: 6, r: 1 } },
+    { s: { c: 7, r: 1 }, e: { c: 8, r: 1 } },
+    { s: { c: 9, r: 1 }, e: { c: 10, r: 1 } },
     // empty row
-    { s: { c: 0, r: 2 }, e: { c: 9, r: 2 } },
+    { s: { c: 0, r: 2 }, e: { c: 10, r: 2 } },
     // header rows
-    { s: { c: 1, r: 3 }, e: { c: 2, r: 3 } },
+    { s: { c: 2, r: 3 }, e: { c: 3, r: 3 } },
     // data rows
     ...items.value.map((v, i) => ({
-      s: { c: 1, r: 4 + i },
-      e: { c: 2, r: 4 + i }
+      s: { c: 2, r: 4 + i },
+      e: { c: 3, r: 4 + i },
     })),
     //footer row
-    { s: { c: 0, r: 4 + items.value.length }, e: { c: 2, r: 4 + items.value.length }},
-    { s: { c: 3, r: 4 + items.value.length }, e: { c: 7, r: 4 + items.value.length }},
-    { s: { c: 8, r: 4 + items.value.length }, e: { c: 9, r: 4 + items.value.length }}
+    {
+      s: { c: 0, r: 4 + items.value.length },
+      e: { c: 2, r: 4 + items.value.length },
+    },
+    {
+      s: { c: 3, r: 4 + items.value.length },
+      e: { c: 6, r: 4 + items.value.length },
+    },
+    {
+      s: { c: 7, r: 4 + items.value.length },
+      e: { c: 10, r: 4 + items.value.length },
+    },
   ]
   ws['!cols'] = [
     { wch: 10 },
+    { wch: 16 },
     { wch: 10 },
     { wch: 36 },
     { wch: 6 },
@@ -254,14 +261,31 @@ const handleDownload = () => {
     { wch: 6 },
     { wch: 6 },
     { wch: 6 },
-    { wch: 10 }
+    { wch: 10 },
   ]
 
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, '日報表')
+  XLSX.utils.book_append_sheet(wb, ws, `${sheetDate}日報表`)
 
-  XLSX.writeFile(wb, '日報表.xlsx')
+  XLSX.writeFile(wb, `${sheetDate}日報表.xlsx`)
 }
+
+//pagination
+// const pageSize = ref(10)
+// const page = ref(1)
+
+// const handlePageChange = (p) => {
+//   page.value = p
+// }
+
+// const getFilteredData = computed(() => items.value.length)
+
+// const getTableData = computed(() =>
+//   items.value.slice(
+//     (page.value - 1) * pageSize.value,
+//     page.value * pageSize.value
+//   )
+// )
 </script>
 
 <style lang="scss" scoped>
@@ -280,7 +304,7 @@ const handleDownload = () => {
       align-items: center;
       color: rgb(96, 98, 102);
 
-      .demonstration {
+      .selectDate {
         margin-right: 10px;
         font-size: 14px;
       }

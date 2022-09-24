@@ -4,7 +4,7 @@
       <div class="card-header">
         <h2>GHP報表</h2>
         <div class="block">
-          <span class="demonstration">請選擇日期區間</span>
+          <span class="selectDate">請選擇日期區間</span>
           <el-date-picker
             v-model="dates"
             type="daterange"
@@ -42,7 +42,12 @@
         prop="class"
         width="170"
       />
-      <el-table-column label="食品良好衛生規範法規GHP檢查" fixed prop="description" min-width="400" />
+      <el-table-column
+        label="食品良好衛生規範法規GHP檢查"
+        fixed
+        prop="description"
+        min-width="400"
+      />
       <el-table-column
         label="合格次數"
         align="center"
@@ -124,21 +129,28 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { subDays, startOfDay, format } from 'date-fns'
+import { subDays, startOfDay, format, parseISO } from 'date-fns'
 import * as XLSX from 'xlsx'
 import { useRegulationStore } from '../stores/regulations'
-import { useReportStore } from '../stores/reports'
+import { useReportGhpStore } from '../stores/reportsGhp'
 
 const regulationStore = useRegulationStore()
 const { regulations } = storeToRefs(regulationStore)
 const { getRegulations } = regulationStore
 
-const reportStore = useReportStore()
-const { getReportGhp } = reportStore
+const reportGhpStore = useReportGhpStore()
+const { getReportGhp } = reportGhpStore
 
 //date picker
 const today = startOfDay(new Date())
 const dates = ref([subDays(today, 6), today])
+const formatDate = 'yyyyMMdd'
+
+onMounted(() => {
+  getRegulations()
+  getReports()
+})
+
 const shortcuts = [
   {
     text: '上週',
@@ -171,10 +183,26 @@ const shortcuts = [
 
 const disabledDate = (time) => time.getTime() > Date.now()
 
+const reports = ref({})
+
+const getReports = async () => {
+  const [start, end] = dates.value
+  reports.value = await getReportGhp(start.toISOString(), end.toISOString())
+}
+
+const handleChange = () => {
+  getReports()
+}
+
 // pagination
-const filterData = ref([])
+// const filterData = ref([])
 // const pageSize = ref(10)
 // const page = ref(1)
+
+// const handlePageChange = (p) => {
+//   page.value = p
+// }
+
 // const getFilteredData = computed(() => filterData);
 
 // const getTableData = computed(() =>
@@ -184,18 +212,7 @@ const filterData = ref([])
 //   )
 // )
 
-const reports = ref({})
-
-const getReports = async () => {
-  const [start, end] = dates.value
-  const f = 'yyyy-MM-dd'
-  reports.value = await getReportGhp(format(start, f), format(end, f))
-}
-
-const handleChange = () => {
-  getReports()
-}
-
+//excel download
 const handleDownload = () => {
   const rows = regulations.value.map((reg, i) => ({
     類別: reg.class,
@@ -216,10 +233,14 @@ const handleDownload = () => {
       : '',
   }))
 
+  const sheetDate =
+    format(dates.value[0], formatDate) +
+    '~' +
+    format(dates.value[1], formatDate)
   const ws = XLSX.utils.aoa_to_sheet([
     [
       '制定日期',
-      format(new Date(), 'yyyyMMdd'),
+      format(new Date(), formatDate),
       '桃園市大竹國民小學',
       '',
       '文件編號',
@@ -228,18 +249,13 @@ const handleDownload = () => {
     [
       '制定單位',
       '大竹國小',
-      '食品良好衛生規範法規GHP檢查表',
+      `食品良好衛生規範法規GHP檢查表民國${
+        format(dates.value[0], 'yyyy') - 1911
+      }年）`,
       '',
       '檢查區間',
-      '',
+      `${sheetDate}`,
     ],
-    // [
-    //   '衛生管理人員',
-    //   '',
-    //   '營養師',
-    //   '單位主管',
-    //   '',
-    // ]
   ])
 
   XLSX.utils.sheet_add_json(ws, rows, {
@@ -247,40 +263,47 @@ const handleDownload = () => {
     origin: 'A4',
   })
 
+  XLSX.utils.sheet_add_aoa(
+    ws,
+    [['衛生管理人員', '', '營養師', '單位主管', '', '']],
+    {
+      origin: rows.length + 4,
+    }
+  )
+
   ws['!merges'] = [
     //info rows
     { s: { c: 2, r: 0 }, e: { c: 3, r: 0 } },
-    //header row
+    { s: { c: 2, r: 1 }, e: { c: 3, r: 1 } },
+    //empty row
     { s: { c: 0, r: 2 }, e: { c: 5, r: 2 } },
     //footer row
-    // { s: { c: 0, r: regulations.value.length }, e: { c: 1, r: regulations.value.length } },
-    // { s: { c: 3, r: regulations.value.length }, e: { c: 4, r: regulations.value.length } },
+    {
+      s: { c: 0, r: 4 + regulations.value.length },
+      e: { c: 1, r: 4 + regulations.value.length },
+    },
+    {
+      s: { c: 3, r: 4 + regulations.value.length },
+      e: { c: 5, r: 4 + regulations.value.length },
+    },
   ]
   ws['!cols'] = [
-    { wch: 10 },
+    { wch: 32 },
     { wch: 10 },
     { wch: 36 },
     { wch: 10 },
     { wch: 10 },
-    { wch: 10 },
+    { wch: 18 },
     { wch: 18 },
     { wch: 10 },
   ]
 
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, 'GHP報表')
 
-  XLSX.writeFile(wb, 'GHP報表.xlsx')
+  XLSX.utils.book_append_sheet(wb, ws, `${sheetDate}GHP報表`)
+
+  XLSX.writeFile(wb, `${sheetDate}GHP報表.xlsx`)
 }
-
-const handlePageChange = (p) => {
-  page.value = p
-}
-
-onMounted(() => {
-  getRegulations()
-  getReports()
-})
 </script>
 
 <style lang="scss" scoped>
@@ -298,7 +321,7 @@ onMounted(() => {
       align-items: center;
       color: rgb(96, 98, 102);
 
-      .demonstration {
+      .selectDate {
         margin-right: 10px;
         font-size: 14px;
       }

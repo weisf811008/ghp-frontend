@@ -4,7 +4,7 @@
       <div class="card-header">
         <h2>訪視表報表</h2>
         <div class="block">
-          <span class="demonstration">請選擇日期區間</span>
+          <span class="selectDate">請選擇日期區間</span>
           <el-date-picker
             v-model="dates"
             type="daterange"
@@ -22,7 +22,7 @@
         </div>
       </div>
     </template>
-    <el-table :data="regulations" table-layout="auto">
+    <el-table :data="visitingForms" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
           {{ scope.$index + 1 }}
@@ -42,7 +42,12 @@
         prop="class"
         width="170"
       />
-      <el-table-column label="訪視項目" fixed prop="description" min-width="400" />
+      <el-table-column
+        label="訪視項目"
+        fixed
+        prop="description"
+        min-width="400"
+      />
       <el-table-column
         label="合格次數"
         align="center"
@@ -126,15 +131,20 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { subDays, startOfDay, format } from 'date-fns'
 import * as XLSX from 'xlsx'
-import { useRegulationStore } from '../stores/regulations'
-import { useReportStore } from '../stores/reports'
+import { useVisitingFormStore } from '../stores/visitingForms'
+import { useReportVisitingStore } from '../stores/reportsVisiting'
 
-const regulationStore = useRegulationStore()
-const { regulations } = storeToRefs(regulationStore)
-const { getRegulations } = regulationStore
+const visitingFormStore = useVisitingFormStore()
+const { visitingForms } = storeToRefs(visitingFormStore)
+const { getVisitingForms } = visitingFormStore
 
-const reportStore = useReportStore()
-const { getReportGhp } = reportStore
+const reportVisitingStore = useReportVisitingStore()
+const { getReportVisiting } = reportVisitingStore
+
+onMounted(() => {
+  getVisitingForms()
+  getReports()
+})
 
 //date picker
 const today = startOfDay(new Date())
@@ -171,10 +181,29 @@ const shortcuts = [
 
 const disabledDate = (time) => time.getTime() > Date.now()
 
+const reports = ref({})
+
+const getReports = async () => {
+  const [start, end] = dates.value
+  reports.value = await getReportVisiting(
+    start.toISOString(),
+    end.toISOString()
+  )
+}
+
+const handleChange = () => {
+  getReports()
+}
+
 // pagination
-const filterData = ref([])
+// const filterData = ref([])
 // const pageSize = ref(10)
 // const page = ref(1)
+
+// const handlePageChange = (p) => {
+//   page.value = p
+// }
+
 // const getFilteredData = computed(() => filterData);
 
 // const getTableData = computed(() =>
@@ -184,42 +213,37 @@ const filterData = ref([])
 //   )
 // )
 
-const reports = ref({})
-
-const getReports = async () => {
-  const [start, end] = dates.value
-  const f = 'yyyy-MM-dd'
-  reports.value = await getReportGhp(format(start, f), format(end, f))
-}
-
-const handleChange = () => {
-  getReports()
-}
-
 const handleDownload = () => {
-  const rows = regulations.value.map((reg, i) => ({
-    類別: reg.class,
-    編號: reg.code,
-    訪視項目: reg.description,
-    合格次數: reports.value[reg.code] ? reports.value[reg.code].pass.length : 0,
-    不合格次數: reports.value[reg.code]
-      ? reports.value[reg.code].fail.length
+  const rows = visitingForms.value.map((visit, i) => ({
+    類別: visit.class,
+    編號: visit.code,
+    訪視項目: visit.description,
+    合格次數: reports.value[visit.code]
+      ? reports.value[visit.code].pass.length
       : 0,
-    其他次數: reports.value[reg.code]
-      ? reports.value[reg.code].others.length
+    不合格次數: reports.value[visit.code]
+      ? reports.value[visit.code].fail.length
       : 0,
-    不合格日期及狀況: reports.value[reg.code]
-      ? reports.value[reg.code].fail.join(', ')
+    其他次數: reports.value[visit.code]
+      ? reports.value[visit.code].others.length
+      : 0,
+    不合格日期及狀況: reports.value[visit.code]
+      ? reports.value[visit.code].fail.join(', ')
       : '',
-    合格日期: reports.value[reg.code]
-      ? reports.value[reg.code].pass.join(', ')
+    合格日期: reports.value[visit.code]
+      ? reports.value[visit.code].pass.join(', ')
       : '',
   }))
 
+  const formatDate = 'yyyyMMdd'
+  const sheetDate =
+    format(dates.value[0], formatDate) +
+    '~' +
+    format(dates.value[1], formatDate)
   const ws = XLSX.utils.aoa_to_sheet([
     [
       '制定日期',
-      format(new Date(), 'yyyyMMdd'),
+      format(new Date(), formatDate),
       '桃園市大竹國民小學',
       '',
       '文件編號',
@@ -228,24 +252,25 @@ const handleDownload = () => {
     [
       '制定單位',
       '大竹國小',
-      '午餐輔導訪視表',
+      `午餐輔導訪視表（${format(dates.value[0], 'yyyy') - 1911}年）`,
       '',
       '檢查區間',
-      '',
+      `${sheetDate}`,
     ],
-    // [
-    //   '衛生管理人員',
-    //   '',
-    //   '營養師',
-    //   '單位主管',
-    //   '',
-    // ]
   ])
 
   XLSX.utils.sheet_add_json(ws, rows, {
     header: Object.keys(rows[0]),
     origin: 'A4',
   })
+
+  XLSX.utils.sheet_add_aoa(
+    ws,
+    [['衛生管理人員', '', '營養師', '單位主管', '', '']],
+    {
+      origin: rows.length + 4,
+    }
+  )
 
   ws['!merges'] = [
     //info rows
@@ -254,34 +279,31 @@ const handleDownload = () => {
     //header row
     { s: { c: 0, r: 2 }, e: { c: 5, r: 2 } },
     //footer row
-    // { s: { c: 0, r: regulations.value.length }, e: { c: 1, r: regulations.value.length } },
-    // { s: { c: 3, r: regulations.value.length }, e: { c: 4, r: regulations.value.length } },
+    {
+      s: { c: 0, r: 4 + visitingForms.value.length },
+      e: { c: 1, r: 4 + visitingForms.value.length },
+    },
+    {
+      s: { c: 3, r: 4 + visitingForms.value.length },
+      e: { c: 5, r: 4 + visitingForms.value.length },
+    },
   ]
   ws['!cols'] = [
-    { wch: 10 },
+    { wch: 15 },
     { wch: 10 },
     { wch: 36 },
     { wch: 10 },
     { wch: 10 },
-    { wch: 10 },
+    { wch: 18 },
     { wch: 18 },
     { wch: 10 },
   ]
 
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, '訪視表報表')
+  XLSX.utils.book_append_sheet(wb, ws, `${sheetDate}訪視表報表`)
 
-  XLSX.writeFile(wb, '訪視表報表.xlsx')
+  XLSX.writeFile(wb, `${sheetDate}訪視表報表.xlsx`)
 }
-
-const handlePageChange = (p) => {
-  page.value = p
-}
-
-onMounted(() => {
-  getRegulations()
-  getReports()
-})
 </script>
 
 <style lang="scss" scoped>
@@ -299,7 +321,7 @@ onMounted(() => {
       align-items: center;
       color: rgb(96, 98, 102);
 
-      .demonstration {
+      .selectDate {
         margin-right: 10px;
         font-size: 14px;
       }
