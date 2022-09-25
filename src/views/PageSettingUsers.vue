@@ -2,22 +2,17 @@
   <el-card class="box-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <h2>帳號管理</h2>
+        <h2>學校帳號管理</h2>
         <el-button @click="() => (showCreateDialog = true)" icon="Plus">
           新增帳號
         </el-button>
       </div>
     </template>
     <el-input v-model="search" placeholder="Search" />
-    <el-table :data="getTableData" table-layout="auto">
+    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
           {{ scope.$index + (page - 1) * pageSize + 1 }}
-        </template>
-      </el-table-column>
-      <el-table-column label="學校名稱" fixed align="center" width="200">
-        <template #default="scope">
-          {{ scope.row.school.name }}
         </template>
       </el-table-column>
       <el-table-column label="角色名稱" prop="roles" align="center" width="100">
@@ -57,7 +52,6 @@
             text
             icon="Delete"
             @click="handleDeleteUser(scope.row)"
-            width="80px"
           >
             刪除
           </el-button>
@@ -83,31 +77,15 @@
       :model="createData"
       :rules="rules"
       label-width="auto"
-      :label-position="labelPosition"
       status-icon
       hide-required-asterisk
     >
-      <el-form-item label="學校名稱" prop="schoolId">
-        <el-select
-          class="formSelect"
-          v-model="createData.schoolId"
-          placeholder="選擇學校"
-        >
-          <el-option
-            v-for="school in schools"
-            :value="school.id"
-            :label="`[${school.code}]${school.name}`"
-            :key="`select-school-${school.id}`"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item label="角色名稱" prop="role">
         <el-select
           class="formSelect"
           v-model="createData.role"
           placeholder="選擇角色"
         >
-          <!-- <el-option value="系統管理員" /> -->
           <el-option value="學校管理員" />
           <el-option value="巡檢人員" />
         </el-select>
@@ -157,7 +135,6 @@
       :model="updateData"
       :rules="rules"
       label-width="auto"
-      :label-position="labelPosition"
       status-icon
       hide-required-asterisk
     >
@@ -167,7 +144,6 @@
           v-model="updateData.role"
           placeholder="選擇角色"
         >
-          <!-- <el-option value="系統管理員" /> -->
           <el-option value="學校管理員" />
           <el-option value="巡檢人員" />
         </el-select>
@@ -213,7 +189,6 @@
       :model="changeData"
       :rules="rules"
       label-width="auto"
-      :label-position="labelPosition"
       status-icon
       hide-required-asterisk
     >
@@ -242,22 +217,14 @@
 </template>
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import { ElMessageBox, ElNotification } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '../stores/users'
-import { useSchoolStore } from '../stores/school'
 
 const userStore = useUserStore()
-const { users } = storeToRefs(userStore)
+const { users, isLoading } = storeToRefs(userStore)
 const { getUsers, createUser, updateUser, deleteUser, resetPassword } =
   userStore
-
-const schoolStore = useSchoolStore()
-const { schools } = storeToRefs(schoolStore)
-const { getSchools } = schoolStore
-
-const search = ref('')
-const labelPosition = ref('right')
 
 const showCreateDialog = ref(false)
 const showUpdateDialog = ref(false)
@@ -272,7 +239,6 @@ const updateFormRef = ref()
 const changeFormRef = ref()
 
 const createData = ref({
-  schoolId: null,
   role: [],
   name: '',
   username: '',
@@ -283,7 +249,6 @@ const createData = ref({
 
 const updateData = ref({
   id: null,
-  schoolId: null,
   role: [],
   name: '',
   username: '',
@@ -298,8 +263,24 @@ const changeData = ref({
   password: '',
 })
 
+onMounted(() => {
+  getUsers()
+})
+
+const search = ref('')
+const filterData = () =>
+  (tableData.value = users.value.filter(
+    (data) =>
+      !data.reserved &&
+      (!search.value ||
+        data.roles.some((r) => r.role.includes(search.value)) ||
+        data.name.includes(search.value) ||
+        data.username.includes(search.value) ||
+        data.phone.includes(search.value) ||
+        data.email.includes(search.value))
+  ))
+
 const rules = reactive({
-  schoolId: [{ required: true, message: '此欄位不得為空', trigger: 'blur' }],
   role: [
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
     { max: 50, message: '最多50個字元' },
@@ -316,41 +297,37 @@ const rules = reactive({
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
     { max: 100, message: '最多100個字元' },
   ],
+  phone: [
+    {
+      validator(rule, value, callback) {
+        if (!value || /^0\d{1,3}-?\d{3,4}-?\d{3,4}#?\d{0,6}$/.test(value)) {
+          callback()
+        } else {
+          callback(new Error('電話號碼格式錯誤'))
+        }
+      },
+      trigger: 'blur',
+    },
+  ],
 })
 
+//pagination
 const pageSize = ref(10)
 const page = ref(1)
 const tableData = ref([])
-
-const filterData = () =>
-  (tableData.value = users.value.filter(
-    (data) =>
-      !data.reserved &&
-      (!search.value ||
-        data.school.name.includes(search.value) ||
-        data.roles.some((r) => r.role.includes(search.value)) ||
-        data.name.includes(search.value) ||
-        data.username.includes(search.value) ||
-        data.phone.includes(search.value) ||
-        data.email.includes(search.value))
-  ))
 const getFilteredData = computed(() => filterData())
-
 const getTableData = computed(() =>
   filterData().slice(
     (page.value - 1) * pageSize.value,
     page.value * pageSize.value
   )
 )
-
-onMounted(() => {
-  getUsers()
-  getSchools()
-})
+const handlePageChange = (p) => {
+  page.value = p
+}
 
 const handleShowUpdateDialog = (row) => {
   updateData.value.id = row.id
-  updateData.value.schoolId = row.schoolId
   updateData.value.role = row.roles[0].role
   updateData.value.name = row.name
   updateData.value.username = row.username
@@ -390,7 +367,6 @@ const handleCreateUser = (e, formRef) => {
     if (valid) {
       try {
         const data = {
-          schoolId: createData.value.schoolId,
           roles: [createData.value.role],
           name: createData.value.name,
           username: createData.value.username,
@@ -400,16 +376,15 @@ const handleCreateUser = (e, formRef) => {
         }
         await createUser(data)
         handleCloseCreateDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '新增成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '新增失敗',
           type: 'error',
+          message: '新增失敗',
         })
       }
     }
@@ -422,7 +397,6 @@ const handleUpdateUser = (e, formRef) => {
     if (valid) {
       try {
         const data = {
-          schoolId: updateData.value.schoolId,
           roles: [updateData.value.role],
           name: updateData.value.name,
           username: updateData.value.username,
@@ -431,16 +405,15 @@ const handleUpdateUser = (e, formRef) => {
         }
         await updateUser(updateData.value.id, data)
         handleCloseUpdateDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '修改成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '修改失敗',
           type: 'error',
+          message: '修改失敗',
         })
       }
     }
@@ -454,16 +427,15 @@ const handleChangePassword = (e, formRef) => {
       try {
         await resetPassword(changeData.value.id, changeData.value.password)
         handleCloseChangeDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '重設密碼成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '重設密碼失敗',
           type: 'error',
+          message: '重設密碼失敗',
         })
       }
     }
@@ -479,28 +451,24 @@ const handleDeleteUser = (row) => {
     .then(async () => {
       try {
         await deleteUser(row.id)
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '刪除成功',
         })
       } catch (e) {
         console.error(e)
-        ElMessage({
+        ElNotification({
           type: 'error',
           message: '刪除失敗',
         })
       }
     })
     .catch(() => {
-      ElMessage({
+      ElNotification({
         type: 'info',
         message: '取消刪除',
       })
     })
-}
-
-const handlePageChange = (p) => {
-  page.value = p
 }
 </script>
 
@@ -530,7 +498,7 @@ const handlePageChange = (p) => {
 }
 
 .formSelect {
-  width: 100vw;
+  width: 100%;
 }
 
 .showUserData {
