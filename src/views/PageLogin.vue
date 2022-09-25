@@ -16,7 +16,7 @@
             <el-form-item label="帳號" prop="username">
               <el-input
                 v-model="loginData.username"
-                @keyup.enter="e => handleSubmit(e, loginFormRef)"
+                @keyup.enter="(e) => handleSubmit(e, loginFormRef)"
                 placeholder="請輸入帳號"
               />
             </el-form-item>
@@ -25,14 +25,14 @@
                 v-model="loginData.password"
                 type="password"
                 autocomplete="off"
-                @keyup.enter="e => handleSubmit(e, loginFormRef)"
+                @keyup.enter="(e) => handleSubmit(e, loginFormRef)"
                 placeholder="請輸入密碼"
               />
             </el-form-item>
             <el-form-item>
               <el-button
                 class="formButton"
-                @click="e => handleSubmit(e, loginFormRef)"
+                @click="(e) => handleSubmit(e, loginFormRef)"
                 >登入</el-button
               >
             </el-form-item>
@@ -45,7 +45,7 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-import { ElNotification} from 'element-plus'
+import { ElNotification } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '../stores/auth'
@@ -59,12 +59,12 @@ const router = useRouter()
 const loginFormRef = ref()
 const loginData = ref({
   username: '',
-  password: ''
+  password: '',
 })
 
 const rules = reactive({
   username: [{ required: true, message: '必填', trigger: 'blur' }],
-  password: [{ required: true, message: '必填', trigger: 'blur' }]
+  password: [{ required: true, message: '必填', trigger: 'blur' }],
 })
 
 const handleSubmit = async (e, formRef) => {
@@ -76,17 +76,14 @@ const handleSubmit = async (e, formRef) => {
         await loginUser(loginData.value)
         router.push({ name: 'Home' })
       } catch (e) {
-        console.error(e)
         ElNotification({
-          title: 'Error',
+          type: 'error',
           message: '帳號或密碼錯誤',
-          type: 'error'
         })
       }
     }
   })
 }
-//
 </script>
 <style lang="scss" scoped>
 .layoutTemplate {
