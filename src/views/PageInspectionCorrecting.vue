@@ -358,9 +358,8 @@ const handleSubmitInspectForm = async (e, formRef) => {
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '複檢紀錄失敗',
           type: 'error',
+          message: '複檢紀錄失敗',
         })
       }
     }
@@ -398,28 +397,6 @@ const handleSubmitInspectForm = async (e, formRef) => {
 }
 :deep(tr.no-expand > td.el-table__expand-column > div.cell) {
   display: none;
-}
-
-.demo-date-picker {
-  display: flex;
-  width: 99.9%;
-  padding: 0;
-  flex-wrap: wrap;
-}
-.demo-date-picker .block {
-  padding: 30px 0;
-  text-align: center;
-  border-right: solid 1px var(--el-border-color);
-  flex: 1;
-}
-.demo-date-picker .block:last-child {
-  border-right: none;
-}
-.demo-date-picker .demonstration {
-  display: block;
-  color: var(--el-text-color-secondary);
-  font-size: 14px;
-  margin-bottom: 20px;
 }
 
 :deep(.el-radio-button__inner:hover) {
