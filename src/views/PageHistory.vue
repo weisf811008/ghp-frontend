@@ -38,7 +38,6 @@
 import { ref, computed } from 'vue'
 
 const search = ref('')
-const labelPosition = ref('right')
 
 // onMounted(() => {
 // })
@@ -82,6 +81,6 @@ const labelPosition = ref('right')
 }
 
 .formSelect {
-  width: 100vw;
+  width: 100%;
 }
 </style>
