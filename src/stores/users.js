@@ -11,11 +11,11 @@ export const useUserStore = defineStore(resource, () => {
   const getUsers = async () => {
     isLoading.value = true
     const res = await request.get(resource)
-    users.value = res.data.users
+    users.value = res.data
     isLoading.value = false
   }
 
-  const createUser = async data => {
+  const createUser = async (data) => {
     isLoading.value = true
     await request.post(resource, data)
     isLoading.value = false
@@ -29,7 +29,7 @@ export const useUserStore = defineStore(resource, () => {
     await getUsers()
   }
 
-  const deleteUser = async id => {
+  const deleteUser = async (id) => {
     isLoading.value = true
     await request.delete(`${resource}/${id}`)
     isLoading.value = false
@@ -49,6 +49,6 @@ export const useUserStore = defineStore(resource, () => {
     createUser,
     updateUser,
     deleteUser,
-    resetPassword
+    resetPassword,
   }
 })

@@ -8,19 +8,18 @@ const resource = 'inspections'
 export const useInspectionStore = defineStore(resource, () => {
   const inspections = ref([])
   const createFormId = ref(null)
-  const photos = ref('')
+  const files = ref('')
   const isLoading = ref(false)
 
+  //取得巡檢紀錄清單
   const getInspections = async () => {
     isLoading.value = true
     const res = await request.get(resource)
-    inspections.value = res.data.inspections
-    inspections.value.sort((a, b) =>
-      isAfter(parseISO(a.date), parseISO(b.date)) ? -1 : 1
-    )
+    inspections.value = res.data
     isLoading.value = false
   }
 
+  //新增一筆巡檢紀錄
   const createInspection = async (data) => {
     isLoading.value = true
     await request.post(resource, data)
@@ -28,13 +27,15 @@ export const useInspectionStore = defineStore(resource, () => {
     await getInspections()
   }
 
+  //取得一筆巡檢紀錄
   const getInspection = async (id) => {
     isLoading.value = true
     const res = await request.get(`${resource}/${id}`)
     isLoading.value = false
-    return res.data.inspection
+    return res.data
   }
 
+  //修改一筆巡檢紀錄 *****有點問題
   const updateInspection = async (id, data) => {
     isLoading.value = true
     await request.put(`${resource}/${id}`, data)
@@ -42,24 +43,28 @@ export const useInspectionStore = defineStore(resource, () => {
     await getInspections()
   }
 
+  //上傳一個檔案
   const uploadFile = async (data) => {
     isLoading.value = true
-    await request.post(`${resource}/upload`, data)
+    await request.post(`${resource}/files`, data)
     isLoading.value = false
   }
 
-  const getPhotos = async () => {
+  //取得一個已上傳檔案
+  const getFile = async (filename) => {
     isLoading.value = true
-    const res = await request.get(`${resource}/photo/${filename}`)
-    photos.value = res.data.photos
+    const res = await request.get(`${resource}/files/${filename}`)
+    files.value = res.data
     isLoading.value = false
   }
 
+  //取得表單清單
   const setCreateFormId = (formId) => {
     createFormId.value = formId
   }
 
   return {
+    isLoading,
     inspections,
     createFormId,
     setCreateFormId,
@@ -68,6 +73,6 @@ export const useInspectionStore = defineStore(resource, () => {
     getInspection,
     updateInspection,
     uploadFile,
-    getPhotos,
+    getFile,
   }
 })

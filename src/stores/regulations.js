@@ -8,10 +8,11 @@ export const useRegulationStore = defineStore(resource, () => {
   const regulations = ref([])
   const isLoading = ref(false)
 
+  //取得條文清單
   const getRegulations = async () => {
     isLoading.value = true
     const res = await request.get(resource)
-    regulations.value = res.data.regulations
+    regulations.value = res.data
     regulations.value.sort((a, b) => {
       if (a.code > b.code) return 1
       if (a.code < b.code) return -1
@@ -20,13 +21,23 @@ export const useRegulationStore = defineStore(resource, () => {
     isLoading.value = false
   }
 
-  const createRegulation = async data => {
+  //新增一筆條文
+  const createRegulation = async (data) => {
     isLoading.value = true
     await request.post(resource, data)
     isLoading.value = false
     await getRegulations()
   }
 
+  //取得一筆條文
+  const getRegulation = async (id) => {
+    isLoading.value = true
+    const res = await request.get(`${resource}/${id}`)
+    isLoading.value = false
+    return res.data
+  }
+
+  //修改一筆條文
   const updateRegulation = async (id, data) => {
     isLoading.value = true
     await request.put(`${resource}/${id}`, data)
@@ -34,7 +45,8 @@ export const useRegulationStore = defineStore(resource, () => {
     await getRegulations()
   }
 
-  const deleteRegulation = async id => {
+  //刪除一筆條文
+  const deleteRegulation = async (id) => {
     isLoading.value = true
     await request.delete(`${resource}/${id}`)
     isLoading.value = false
@@ -46,7 +58,8 @@ export const useRegulationStore = defineStore(resource, () => {
     isLoading,
     getRegulations,
     createRegulation,
+    getRegulation,
     updateRegulation,
-    deleteRegulation
+    deleteRegulation,
   }
 })
