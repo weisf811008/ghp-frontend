@@ -7,6 +7,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref({})
   const returnRul = ref(null)
 
+  //帳號登入
   const loginUser = async (credential) => {
     try {
       isLoading.value = true
@@ -19,6 +20,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  //帳號登出
   const logoutUser = async () => {
     try {
       isLoading.value = true
@@ -31,6 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  //取得當前登入使用者資訊
   const getUserInfo = async () => {
     try {
       isLoading.value = true
