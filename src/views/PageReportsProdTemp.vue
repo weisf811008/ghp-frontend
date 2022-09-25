@@ -2,7 +2,7 @@
   <el-card class="box-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <h2>成品溫度報表</h2>
+        <h2>成品中心溫度報表</h2>
         <div class="block">
           <span class="selectDate">請選擇日期區間</span>
           <el-date-picker
@@ -22,10 +22,10 @@
         </div>
       </div>
     </template>
-    <el-table :data="reports" table-layout="auto" id="report">
+    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
-          {{ scope.$index + 1 }}
+          {{ scope.$index + (page - 1) * pageSize + 1 }}
         </template>
       </el-table-column>
       <el-table-column label="日期" align="center">
@@ -41,7 +41,7 @@
               fail: !scope.row.wasCovered,
             }"
           >
-            {{ scope.row.wasCovered ? '✓' : '不合格' }}
+            {{ getDisplayText(scope.row.wasCovered) }}
           </span>
         </template>
       </el-table-column>
@@ -50,23 +50,25 @@
       <el-table-column label="副菜" align="center" prop="sideDish" />
       <el-table-column label="青菜" align="center" prop="vegetable" />
     </el-table>
-    <!-- <el-pagination
+    <el-pagination
       class="pages"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="getFilteredData.length"
+      :total="reports.length"
       @current-change="handlePageChange"
-    /> -->
+    />
   </el-card>
 </template>
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { subDays, startOfDay, format } from 'date-fns'
 import * as XLSX from 'xlsx'
 import { useReportProdtempStore } from '../stores/reportsProdtemp'
 import parseISO from 'date-fns/esm/fp/parseISO/index.js'
 
 const reportProdtempStore = useReportProdtempStore()
+const { isLoading } = storeToRefs(reportProdtempStore)
 const { getReportProdtemp } = reportProdtempStore
 
 onMounted(() => {
@@ -121,6 +123,13 @@ const getReports = async () => {
   abnormalRows.value = res.abnormalRows
 }
 
+const getDisplayText = (value) => {
+  if (typeof value !== 'boolean') {
+    return ''
+  }
+  return value ? '✓' : '不合格'
+}
+
 //excel download
 const handleDownload = () => {
   const sheetDate =
@@ -145,7 +154,7 @@ const handleDownload = () => {
         '',
         '',
         '月份',
-        `${format(dates.value[0], 'MM')}`,
+        `${format(dates.value[0], 'M')}月`,
       ],
       [],
       ['項次', '日期', '成品確實封蓋', '主食', '主菜', '副菜', '青菜'],
@@ -154,7 +163,7 @@ const handleDownload = () => {
         reports.value.map((row, i) => [
           i + 1,
           format(parseISO(row.date), f),
-          row.wasCovered ? '✓' : '不合格',
+          getDisplayText(row.wasCovered),
           row.starter,
           row.mainCourse,
           row.sideDish,
@@ -213,28 +222,25 @@ const handleDownload = () => {
   ]
 
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, `${sheetDate}成品溫度報表`)
+  XLSX.utils.book_append_sheet(wb, ws, `${sheetDate}成品中心溫度報表`)
 
-  XLSX.writeFile(wb, `${sheetDate}成品溫度報表.xlsx`)
+  XLSX.writeFile(wb, `${sheetDate}成品中心溫度報表.xlsx`)
 }
 
 // pagination
-// const filterData = ref([])
-// const pageSize = ref(10)
-// const page = ref(1)
+const pageSize = ref(10)
+const page = ref(1)
 
-// const handlePageChange = (p) => {
-//   page.value = p
-// }
+const handlePageChange = (p) => {
+  page.value = p
+}
 
-// const getFilteredData = computed(() => filterData);
-
-// const getTableData = computed(() =>
-//   filterData().slice(
-//     (page.value - 1) * pageSize.value,
-//     page.value * pageSize.value
-//   )
-// )
+const getTableData = computed(() =>
+  reports.value.slice(
+    (page.value - 1) * pageSize.value,
+    page.value * pageSize.value
+  )
+)
 </script>
 
 <style lang="scss" scoped>

@@ -22,10 +22,10 @@
         </div>
       </div>
     </template>
-    <el-table :data="reports" style="width: 100%">
+    <el-table :data="getTableData" v-loading="isLoading" style="width: 100%">
       <el-table-column label="項次" align="center" width="60">
         <template #default="scope">
-          {{ scope.$index + 1 }}
+          {{ scope.$index + (page - 1) * pageSize + 1 }}
         </template>
       </el-table-column>
       <el-table-column label="日期" align="center">
@@ -89,22 +89,24 @@
         </el-table-column>
       </el-table-column>
     </el-table>
-    <!-- <el-pagination
+    <el-pagination
       class="pages"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="getFilteredData.length"
+      :total="reports.length"
       @current-change="handlePageChange"
-    /> -->
+    />
   </el-card>
 </template>
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { subDays, startOfDay, format, parseISO, getDay } from 'date-fns'
 import * as XLSX from 'xlsx'
 import { useReportTnhStore } from '../stores/reportsTnh'
 
 const reportTnhStore = useReportTnhStore()
+const { isLoading } = storeToRefs(reportTnhStore)
 const { getReportTnh } = reportTnhStore
 
 onMounted(() => {
@@ -162,20 +164,17 @@ const getReports = async () => {
 }
 
 // pagination
-// const filterData = ref([])
-// const pageSize = ref(10)
-// const page = ref(1)
-// const handlePageChange = (p) => {
-//   page.value = p
-// }
-// const getFilteredData = computed(() => filterData);
-
-// const getTableData = computed(() =>
-//   filterData().slice(
-//     (page.value - 1) * pageSize.value,
-//     page.value * pageSize.value
-//   )
-// )
+const pageSize = ref(10)
+const page = ref(1)
+const handlePageChange = (p) => {
+  page.value = p
+}
+const getTableData = computed(() =>
+  reports.value.slice(
+    (page.value - 1) * pageSize.value,
+    page.value * pageSize.value
+  )
+)
 
 //excel download
 const handleDownload = () => {
@@ -206,7 +205,7 @@ const handleDownload = () => {
         '',
         '',
         '月份',
-        `${format(dates.value[0], 'MM')}`,
+        `${format(dates.value[0], 'M')}月`,
       ],
       [''],
       [

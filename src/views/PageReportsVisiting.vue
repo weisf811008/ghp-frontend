@@ -22,10 +22,10 @@
         </div>
       </div>
     </template>
-    <el-table :data="visitingForms" table-layout="auto">
+    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
-          {{ scope.$index + 1 }}
+          {{ scope.$index + (page - 1) * pageSize + 1 }}
         </template>
       </el-table-column>
       <el-table-column
@@ -95,21 +95,23 @@
             <el-descriptions-item label="合格項目：">
               {{
                 reports[scope.row.code]
-                  ? reports[scope.row.code].pass.join(', ')
+                  ? reports[scope.row.code].pass.map(getStatusDetail).join(', ')
                   : ''
               }}
             </el-descriptions-item>
             <el-descriptions-item label="不合格項目：">
               {{
                 reports[scope.row.code]
-                  ? reports[scope.row.code].fail.join(', ')
+                  ? reports[scope.row.code].fail.map(getStatusDetail).join(', ')
                   : ''
               }}
             </el-descriptions-item>
             <el-descriptions-item label="其他項目：">
               {{
                 reports[scope.row.code]
-                  ? reports[scope.row.code].others.join(', ')
+                  ? reports[scope.row.code].others
+                      .map(getStatusDetail)
+                      .join(', ')
                   : ''
               }}
             </el-descriptions-item>
@@ -117,13 +119,13 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- <el-pagination
+    <el-pagination
       class="pages"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="getFilteredData.length"
+      :total="visitingForms.length"
       @current-change="handlePageChange"
-    /> -->
+    />
   </el-card>
 </template>
 <script setup>
@@ -139,6 +141,7 @@ const { visitingForms } = storeToRefs(visitingFormStore)
 const { getVisitingForms } = visitingFormStore
 
 const reportVisitingStore = useReportVisitingStore()
+const { isLoading } = storeToRefs(reportVisitingStore)
 const { getReportVisiting } = reportVisitingStore
 
 onMounted(() => {
@@ -196,22 +199,22 @@ const handleChange = () => {
 }
 
 // pagination
-// const filterData = ref([])
-// const pageSize = ref(10)
-// const page = ref(1)
+const pageSize = ref(10)
+const page = ref(1)
 
-// const handlePageChange = (p) => {
-//   page.value = p
-// }
+const handlePageChange = (p) => {
+  page.value = p
+}
 
-// const getFilteredData = computed(() => filterData);
+const getTableData = computed(() =>
+  visitingForms.value.slice(
+    (page.value - 1) * pageSize.value,
+    page.value * pageSize.value
+  )
+)
 
-// const getTableData = computed(() =>
-//   filterData().slice(
-//     (page.value - 1) * pageSize.value,
-//     page.value * pageSize.value
-//   )
-// )
+const getStatusDetail = ({ date, itemNo, remarks }) =>
+  `${date}(${itemNo}${remarks ? ` ${remarks}` : ''})`
 
 const handleDownload = () => {
   const rows = visitingForms.value.map((visit, i) => ({
@@ -228,10 +231,10 @@ const handleDownload = () => {
       ? reports.value[visit.code].others.length
       : 0,
     不合格日期及狀況: reports.value[visit.code]
-      ? reports.value[visit.code].fail.join(', ')
+      ? reports.value[visit.code].fail.map(getStatusDetail).join(', ')
       : '',
     合格日期: reports.value[visit.code]
-      ? reports.value[visit.code].pass.join(', ')
+      ? reports.value[visit.code].pass.map(({ date }) => date).join(', ')
       : '',
   }))
 

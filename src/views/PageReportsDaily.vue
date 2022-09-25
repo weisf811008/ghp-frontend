@@ -22,10 +22,10 @@
         </div>
       </div>
     </template>
-    <el-table :data="items" table-layout="auto">
+    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
-          {{ scope.$index + 1 }}
+          {{ scope.$index + (page - 1) * pageSize + 1 }}
         </template>
       </el-table-column>
       <el-table-column
@@ -58,13 +58,13 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- <el-pagination
+    <el-pagination
       class="pages"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="getFilteredData.length"
+      :total="items.length"
       @current-change="handlePageChange"
-    /> -->
+    />
   </el-card>
 </template>
 <script setup>
@@ -82,6 +82,7 @@ import { useItemStore } from '../stores/items'
 import { useReportDailyStore } from '../stores/reportsDaily'
 
 const reportDailyStore = useReportDailyStore()
+const { isLoading } = storeToRefs(reportDailyStore)
 const { getReportDaily } = reportDailyStore
 
 const itemStore = useItemStore()
@@ -271,21 +272,19 @@ const handleDownload = () => {
 }
 
 //pagination
-// const pageSize = ref(10)
-// const page = ref(1)
+const pageSize = ref(10)
+const page = ref(1)
 
-// const handlePageChange = (p) => {
-//   page.value = p
-// }
+const handlePageChange = (p) => {
+  page.value = p
+}
 
-// const getFilteredData = computed(() => items.value.length)
-
-// const getTableData = computed(() =>
-//   items.value.slice(
-//     (page.value - 1) * pageSize.value,
-//     page.value * pageSize.value
-//   )
-// )
+const getTableData = computed(() =>
+  items.value.slice(
+    (page.value - 1) * pageSize.value,
+    page.value * pageSize.value
+  )
+)
 </script>
 
 <style lang="scss" scoped>

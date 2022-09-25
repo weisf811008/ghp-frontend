@@ -1,12 +1,14 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { request } from '../utils/http.util'
+import { formatISO } from 'date-fns'
 
 const resource = 'reports/daily'
 
-export const useDailyStore = defineStore(resource, () => {
+export const useReportDailyStore = defineStore(resource, () => {
   const isLoading = ref(false)
 
+  //取得指定日期區間內的巡檢日誌
   const getReportDaily = async (start, end) => {
     isLoading.value = true
     const res = await request.get(resource, {

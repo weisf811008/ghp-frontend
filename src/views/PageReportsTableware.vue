@@ -22,10 +22,10 @@
         </div>
       </div>
     </template>
-    <el-table :data="reports" style="width: 100%">
+    <el-table :data="getTableData" v-loading="isLoading" style="width: 100%">
       <el-table-column label="項次" align="center" width="60">
         <template #default="scope">
-          {{ scope.$index + 1 }}
+          {{ scope.$index + (page - 1) * pageSize + 1 }}
         </template>
       </el-table-column>
       <el-table-column prop="date" label="日期" align="center">
@@ -42,7 +42,7 @@
                 fail: !scope.row.diningBucketLook,
               }"
             >
-              {{ scope.row.diningBucketLook ? '✓' : '不合格' }}
+              {{ getDisplayText(scope.row.diningBucketLook) }}
             </span>
           </template>
         </el-table-column>
@@ -54,7 +54,7 @@
                 fail: !scope.row.diningBucketStarch,
               }"
             >
-              {{ scope.row.diningBucketStarch ? '✓' : '不合格' }}
+              {{ getDisplayText(scope.row.diningBucketStarch) }}
             </span>
           </template>
         </el-table-column>
@@ -66,7 +66,7 @@
                 fail: !scope.row.diningBucketFat,
               }"
             >
-              {{ scope.row.diningBucketFat ? '✓' : '不合格' }}
+              {{ getDisplayText(scope.row.diningBucketFat) }}
             </span>
           </template>
         </el-table-column>
@@ -80,7 +80,7 @@
                 fail: !scope.row.soupBucketLook,
               }"
             >
-              {{ scope.row.soupBucketLook ? '✓' : '不合格' }}
+              {{ getDisplayText(scope.row.soupBucketLook) }}
             </span>
           </template>
         </el-table-column>
@@ -92,7 +92,7 @@
                 fail: !scope.row.soupBucketStarch,
               }"
             >
-              {{ scope.row.soupBucketStarch ? '✓' : '不合格' }}
+              {{ getDisplayText(scope.row.soupBucketStarch) }}
             </span>
           </template>
         </el-table-column>
@@ -104,7 +104,7 @@
                 fail: !scope.row.soupBucketFat,
               }"
             >
-              {{ scope.row.soupBucketFat ? '✓' : '不合格' }}
+              {{ getDisplayText(scope.row.soupBucketFat) }}
             </span>
           </template>
         </el-table-column>
@@ -118,7 +118,7 @@
                 fail: !scope.row.tablewareLook,
               }"
             >
-              {{ scope.row.tablewareLook ? '✓' : '不合格' }}
+              {{ getDisplayText(scope.row.tablewareLook) }}
             </span>
           </template>
         </el-table-column>
@@ -130,7 +130,7 @@
                 fail: !scope.row.tablewareStarch,
               }"
             >
-              {{ scope.row.tablewareStarch ? '✓' : '不合格' }}
+              {{ getDisplayText(scope.row.tablewareStarch) }}
             </span>
           </template>
         </el-table-column>
@@ -142,28 +142,30 @@
                 fail: !scope.row.tablewareFat,
               }"
             >
-              {{ scope.row.tablewareFat ? '✓' : '不合格' }}
+              {{ getDisplayText(scope.row.tablewareFat) }}
             </span>
           </template>
         </el-table-column>
       </el-table-column>
     </el-table>
-    <!-- <el-pagination
+    <el-pagination
       class="pages"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="getFilteredData.length"
+      :total="reports.length"
       @current-change="handlePageChange"
-    /> -->
+    />
   </el-card>
 </template>
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { subDays, startOfDay, format, parseISO } from 'date-fns'
 import * as XLSX from 'xlsx'
 import { useReportTablewareStore } from '../stores/reportsTableware'
 
 const reportTablewareStore = useReportTablewareStore()
+const { isLoading } = storeToRefs(reportTablewareStore)
 const { getReportTableware } = reportTablewareStore
 
 onMounted(() => {
@@ -220,21 +222,26 @@ const getReports = async () => {
 }
 
 // pagination
-// const filterData = ref([])
-// const pageSize = ref(10)
-// const page = ref(1)
+const pageSize = ref(10)
+const page = ref(1)
 
-// const handlePageChange = (p) => {
-//   page.value = p
-// }
-// const getFilteredData = computed(() => filterData);
+const handlePageChange = (p) => {
+  page.value = p
+}
 
-// const getTableData = computed(() =>
-//   filterData().slice(
-//     (page.value - 1) * pageSize.value,
-//     page.value * pageSize.value
-//   )
-// )
+const getTableData = computed(() =>
+  reports.value.slice(
+    (page.value - 1) * pageSize.value,
+    page.value * pageSize.value
+  )
+)
+
+const getDisplayText = (value) => {
+  if (typeof value !== 'boolean') {
+    return ''
+  }
+  return value ? '✓' : '不合格'
+}
 
 //excel download
 const handleDownload = () => {
@@ -269,7 +276,7 @@ const handleDownload = () => {
         '',
         '',
         '月份',
-        `${format(dates.value[0], 'MM')}`,
+        `${format(dates.value[0], 'M')}月`,
       ],
       ['頻率：每週至少抽驗一次，V：表示合格  X：表示不合格，不合格立即改善'],
       ['項次', '日期', '餐桶', '', '', '湯桶', '', '', '餐具', '', ''],
@@ -291,15 +298,15 @@ const handleDownload = () => {
         reports.value.map((row, i) => [
           i + 1,
           format(parseISO(row.date), 'yyyy-MM-dd'),
-          row.diningBucketLook ? '✓' : '不合格',
-          row.diningBucketStarch ? '✓' : '不合格',
-          row.diningBucketFat ? '✓' : '不合格',
-          row.soupBucketLook ? '✓' : '不合格',
-          row.soupBucketStarch ? '✓' : '不合格',
-          row.soupBucketFat ? '✓' : '不合格',
-          row.tablewareLook ? '✓' : '不合格',
-          row.tablewareStarch ? '✓' : '不合格',
-          row.tablewareStarch ? '✓' : '不合格',
+          getDisplayText(row.diningBucketLook),
+          getDisplayText(row.diningBucketStarch),
+          getDisplayText(row.diningBucketFat),
+          getDisplayText(row.soupBucketLook),
+          getDisplayText(row.soupBucketStarch),
+          getDisplayText(row.soupBucketFat),
+          getDisplayText(row.tablewareLook),
+          getDisplayText(row.tablewareStarch),
+          getDisplayText(row.tablewareStarch),
         ])
       )
       .concat([[]])
