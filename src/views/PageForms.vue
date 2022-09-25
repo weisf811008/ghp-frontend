@@ -9,13 +9,13 @@
       </div>
     </template>
     <el-input v-model="search" placeholder="Search" />
-    <el-table :data="getTableData" table-layout="auto">
+    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
           {{ scope.$index + (page - 1) * pageSize + 1 }}
         </template>
       </el-table-column>
-      <el-table-column label="巡檢表單名稱" prop="title" />
+      <el-table-column label="巡檢表單名稱" prop="title" width="200" />
       <el-table-column label="備註" prop="remarks" />
       <el-table-column label="操作" align="center" width="200">
         <template #default="scope">
@@ -147,20 +147,18 @@
 </template>
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import { ElMessageBox, ElNotification } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useFormStore } from '../stores/form'
 import { useItemStore } from '../stores/items'
 
 const formStore = useFormStore()
-const { forms } = storeToRefs(formStore)
+const { forms, isLoading } = storeToRefs(formStore)
 const { getForms, getFormById, createForm, updateForm, deleteForm } = formStore
 
 const itemStore = useItemStore()
-// const { items } = storeToRefs(itemStore)
 const { getItems, getTransferList } = itemStore
 
-const search = ref('')
 const drawer = ref(false)
 const direction = ref('rtl')
 
@@ -185,6 +183,20 @@ const updateData = ref({
   itemIds: [],
 })
 
+const search = ref('')
+const filterData = () =>
+  (tableData.value = forms.value.filter(
+    (data) =>
+      !search.value ||
+      data.title.includes(search.value) ||
+      data.remarks.includes(search.value)
+  ))
+
+onMounted(() => {
+  getForms()
+  getItems()
+})
+
 const rules = reactive({
   title: [
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
@@ -195,20 +207,11 @@ const rules = reactive({
   ],
 })
 
+//pagination
 const pageSize = ref(10)
 const page = ref(1)
 const tableData = ref([])
-
-const filterData = () =>
-  (tableData.value = forms.value.filter(
-    (data) =>
-      !search.value ||
-      data.title.includes(search.value) ||
-      data.remarks.includes(search.value) ||
-      data.itemIds.map((i) => i.itemIds.includes(search.value))
-  ))
 const getFilteredData = computed(() => filterData())
-
 const getTableData = computed(() =>
   filterData().slice(
     (page.value - 1) * pageSize.value,
@@ -216,10 +219,13 @@ const getTableData = computed(() =>
   )
 )
 
-onMounted(() => {
-  getForms()
-  getItems()
-})
+const handlePageChange = (p) => {
+  page.value = p
+}
+
+const handleRenderContent = (h, option) => {
+  return h('span', null, option.label)
+}
 
 const handleShowUpdateForm = async (row) => {
   const form = await getFormById(row.id)
@@ -233,6 +239,7 @@ const handleShowUpdateForm = async (row) => {
 const handleCloseCreateDrawer = () => {
   showCreateForm.value = false
   createData.value.itemIds = []
+  createData.value.remarks = ''
   createFormRef.value.resetFields()
   createFormRef.value.clearValidate()
   createDataTransferRef.value.clearQuery('left')
@@ -251,9 +258,8 @@ const handleCreateForm = (e, formRef) => {
   e.preventDefault()
   if (createData.value.itemIds.length === 0) {
     ElNotification({
-      title: 'Error',
-      message: '新增失敗，請選取檢核細項',
       type: 'error',
+      message: '新增失敗，請選取檢核細項',
     })
   } else {
     formRef.validate(async (valid, fields) => {
@@ -266,16 +272,15 @@ const handleCreateForm = (e, formRef) => {
           }
           await createForm(data)
           handleCloseCreateDrawer()
-          ElMessage({
+          ElNotification({
             type: 'success',
             message: '新增成功',
           })
         } catch (e) {
           console.error(e)
           ElNotification({
-            title: 'Error',
-            message: '新增失敗',
             type: 'error',
+            message: '新增失敗',
           })
         }
       }
@@ -287,9 +292,8 @@ const handleUpdateForm = (e, formRef) => {
   e.preventDefault()
   if (updateData.value.itemIds.length === 0) {
     ElNotification({
-      title: 'Error',
-      message: '修改失敗，請選取檢核細項',
       type: 'error',
+      message: '修改失敗，請選取檢核細項',
     })
   } else {
     formRef.validate(async (valid, fields) => {
@@ -303,16 +307,15 @@ const handleUpdateForm = (e, formRef) => {
           }
           await updateForm(updateData.value.id, data)
           handleCloseUpdateDrawer()
-          ElMessage({
+          ElNotification({
             type: 'success',
             message: '修改成功',
           })
         } catch (e) {
           console.error(e)
           ElNotification({
-            title: 'Error',
-            message: '修改失敗',
             type: 'error',
+            message: '修改失敗',
           })
         }
       }
@@ -329,32 +332,24 @@ const handleDeleteForm = (row) => {
     .then(async () => {
       try {
         await deleteForm(row.id)
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '刪除成功',
         })
       } catch (e) {
         console.error(e)
-        ElMessage({
+        ElNotification({
           type: 'error',
           message: '刪除失敗',
         })
       }
     })
     .catch(() => {
-      ElMessage({
+      ElNotification({
         type: 'info',
         message: '取消刪除',
       })
     })
-}
-
-const handleRenderContent = (h, option) => {
-  return h('span', null, option.label)
-}
-
-const handlePageChange = (p) => {
-  page.value = p
 }
 </script>
 
@@ -402,7 +397,7 @@ const handlePageChange = (p) => {
   padding: 5px;
 }
 
-@media screen and (max-width: 1080px){
+@media screen and (max-width: 1080px) {
   :deep(.el-transfer-panel) {
     width: 25vw;
   }
