@@ -9,7 +9,7 @@
       </div>
     </template>
     <el-input v-model="search" placeholder="Search" />
-    <el-table :data="getTableData" table-layout="auto">
+    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
           {{ scope.$index + (page - 1) * pageSize + 1 }}
@@ -110,13 +110,13 @@
 </template>
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import { ElMessageBox, ElNotification } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useCategoryStore } from '../stores/categories'
 
 const categoryStore = useCategoryStore()
 
-const { categories } = storeToRefs(categoryStore)
+const { categories, isLoading } = storeToRefs(categoryStore)
 const { getCategories, createCategory, updateCategory, deleteCategory } =
   categoryStore
 
@@ -190,16 +190,15 @@ const handleCreateCategory = (e, formRef) => {
       try {
         await createCategory(createData.value)
         handleCloseCreateDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '新增成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '新增失敗',
           type: 'error',
+          message: '新增失敗',
         })
       }
     }
@@ -215,16 +214,15 @@ const handleUpdateCategory = (e, formRef) => {
           category: updateData.value.category,
         })
         handleCloseUpdateDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '修改成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '修改失敗',
           type: 'error',
+          message: '修改失敗',
         })
       }
     }
@@ -240,20 +238,20 @@ const handleDeleteCategory = (row) => {
     .then(async () => {
       try {
         await deleteCategory(row.id)
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '刪除成功',
         })
       } catch (e) {
         console.error(e)
-        ElMessage({
+        ElNotification({
           type: 'error',
           message: '刪除失敗',
         })
       }
     })
     .catch(() => {
-      ElMessage({
+      ElNotification({
         type: 'info',
         message: '取消刪除',
       })
