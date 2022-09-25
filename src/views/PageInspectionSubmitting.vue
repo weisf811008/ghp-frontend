@@ -56,8 +56,8 @@
           >
             <template #default="scope">
               <el-input
-                v-model="inspectionDetailMap[scope.row.id].checkValue"
-                v-if="scope.row.needToComment"
+                v-model="inspectionDetailMap[scope.row.itemId].checkValue"
+                v-if="scope.row.needCheckValue"
                 placeholder="測量值"
                 size="large"
               />
@@ -71,11 +71,13 @@
           >
             <template #default="scope">
               <el-form-item
-                :error="uncheckedItems.includes(scope.row.id) ? '必填' : null"
-                @change="() => handleDetailChange(scope.row.id)"
+                :error="
+                  uncheckedItems.includes(scope.row.itemId) ? '必填' : null
+                "
+                @change="() => handleDetailChange(scope.row.itemId)"
               >
                 <el-radio-group
-                  v-model="inspectionDetailMap[scope.row.id].status"
+                  v-model="inspectionDetailMap[scope.row.itemId].status"
                 >
                   <el-radio-button
                     label="pass"
@@ -106,20 +108,20 @@
             <template #default="scope">
               <div>
                 <el-input
-                  v-model="inspectionDetailMap[scope.row.id].remarks"
+                  v-model="inspectionDetailMap[scope.row.itemId].remarks"
                   prop="remarks"
                   :rows="3"
                   type="textarea"
-                  :key="`remarks-${scope.row.id}`"
+                  :key="`remarks-${scope.row.itemId}`"
                   placeholder="請填寫備註"
                 />
               </div>
               <div>
                 <el-upload
                   :file-list="
-                    inspectionDetailMap[scope.row.id].photos.map((p) => ({
-                      name: p.originalname,
-                      url: `/api/inspections/photos/${p.filename}`,
+                    inspectionDetailMap[scope.row.itemId].files.map((f) => ({
+                      name: f.originalname,
+                      url: `/api/inspections/files/${f.filename}`,
                     }))
                   "
                   :on-success="(res) => handleUploaded(scope.row, res)"
@@ -127,7 +129,7 @@
                   :on-remove="
                     (file, files) => handleRemove(scope.row, file, files)
                   "
-                  action="/api/inspections/upload"
+                  action="/api/inspections/files"
                   list-type="picture-card"
                 >
                   <el-icon><Plus /></el-icon>
@@ -184,6 +186,7 @@
   </el-dialog>
 </template>
 <script setup>
+import axios from 'axios'
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElNotification } from 'element-plus'
@@ -241,7 +244,7 @@ const dialogImageVisible = ref(false)
 
 const createData = ref({
   date: format(new Date(), 'yyyy-MM-dd'),
-  dueDate: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
+  dueDate: '',
   checkValue: '',
   remarks: '',
   formId: null,
@@ -281,14 +284,14 @@ const disabledDueDate = (time) => {
 
 const inspectInBatch = (category) => {
   formDetailMap.value[category].forEach((row) => {
-    if (!inspectionDetailMap.value[row.id].status) {
-      inspectionDetailMap.value[row.id].status = 'pass'
+    if (!inspectionDetailMap.value[row.itemId].status) {
+      inspectionDetailMap.value[row.itemId].status = 'pass'
     }
   })
 }
 
-const handleDetailChange = (id) => {
-  uncheckedItems.value = uncheckedItems.value.filter((a) => a !== id)
+const handleDetailChange = (itemId) => {
+  uncheckedItems.value = uncheckedItems.value.filter((a) => a !== itemId)
 }
 
 onMounted(async () => {
@@ -307,27 +310,27 @@ onMounted(async () => {
 
   createData.value.formId = form.value.id
   inspectionDetailMap.value = form.value.details.reduce((acc, cur) => {
-    acc[cur.id] = {
+    acc[cur.itemId] = {
       status: null,
       checkValue: '',
-      formDetailId: cur.id,
+      itemId: cur.itemId,
       remarks: '',
-      photos: [],
+      files: [],
     }
     return acc
   }, {})
 })
 
 const setExpandRow = ({ row, rowIndex }) => {
-  const detail = inspectionDetailMap.value[row.id]
-  const item = form.value.details.find((d) => d.id === row.id)
-  return detail.status === 'pass' && !item.needToComment ? 'no-expand' : null
+  const detail = inspectionDetailMap.value[row.itemId]
+  const item = form.value.details.find((d) => d.itemId === row.itemId)
+  return detail.status === 'pass' && !item.needCheckValue ? 'no-expand' : null
 }
 
 const handleRemove = (row, uploadFile, uploadFiles) => {
-  inspectionDetailMap.value[row.id].photos = inspectionDetailMap.value[
-    row.id
-  ].photos.filter((p) => p.filename !== uploadFile.url.split('/').pop())
+  inspectionDetailMap.value[row.itemId].files = inspectionDetailMap.value[
+    row.itemId
+  ].files.filter((p) => p.filename !== uploadFile.url.split('/').pop())
 }
 
 const handlePictureCardPreview = (uploadFile) => {
@@ -336,7 +339,7 @@ const handlePictureCardPreview = (uploadFile) => {
 }
 
 const handleUploaded = (row, res) => {
-  inspectionDetailMap.value[row.id].photos.push(res)
+  inspectionDetailMap.value[row.itemId].files.push(res)
 }
 
 const imgExt = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg']
@@ -355,17 +358,29 @@ const handleSubmitInspectForm = async (e, formRef) => {
     createData.value.details = Object.values(inspectionDetailMap.value)
     uncheckedItems.value = createData.value.details
       .filter((d) => !d.status)
-      .map((d) => d.formDetailId)
+      .map((d) => d.itemId)
     if (valid && uncheckedItems.value.length === 0) {
       try {
-        await createInspection(createData.value)
+        await createInspection({
+          ...createData.value,
+          date: new Date(createData.value.date).toISOString(),
+          dueDate:
+            createData.value.dueDate &&
+            new Date(createData.value.dueDate).toISOString(),
+        })
         router.push({ name: 'Inspection' })
       } catch (e) {
         console.error(e)
+        const msg =
+          axios.isAxiosError(e) && e.response.status === 422
+            ? e.response.data.errors
+                .map((err) => `${err.param}${err.msg}`)
+                .join('、')
+            : '發生錯誤'
         ElNotification({
-          title: 'Error',
-          message: '新增巡檢紀錄失敗',
           type: 'error',
+          title: '新增巡檢紀錄失敗',
+          message: msg,
         })
       }
     }
