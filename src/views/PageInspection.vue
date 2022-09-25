@@ -9,7 +9,7 @@
       </div>
     </template>
     <el-input v-model="search" placeholder="Search" />
-    <el-table :data="getTableData" table-layout="auto">
+    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
           {{ scope.$index + (page - 1) * pageSize + 1 }}
@@ -31,12 +31,11 @@
           {{ format(parseISO(scope.row.createdAt), 'yyyy/MM/dd HH:mm') }}
         </template>
       </el-table-column>
-      <el-table-column
-        label="巡檢人員"
-        prop="name"
-        align="center"
-        width="100"
-      />
+      <el-table-column label="巡檢人員" align="center" width="100">
+        <template #default="scope">
+          {{ scope.row.inspectedBy.name }}
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" width="250">
         <template #default="scope">
           <el-button
@@ -47,7 +46,7 @@
           >
             查看巡檢紀錄
           </el-button>
-          <el-button
+          <!-- <el-button
             type="warning"
             text
             icon="Edit"
@@ -60,7 +59,7 @@
             "
           >
             複檢
-          </el-button>
+          </el-button> -->
         </template>
       </el-table-column>
     </el-table>
@@ -136,7 +135,7 @@
         }}
       </el-descriptions-item>
       <el-descriptions-item label="巡檢人員">
-        {{ inspection.name }}
+        {{ inspection.inspectedBy.name }}
       </el-descriptions-item>
       <el-descriptions-item label="填報時間">
         {{
@@ -194,9 +193,9 @@
           <div>
             <el-upload
               :file-list="
-                scope.row.photos.map((p) => ({
-                  name: p.originalname,
-                  url: `/api/inspections/photos/${p.filename}`,
+                scope.row.files.map((f) => ({
+                  name: f.originalname,
+                  url: `/api/inspections/files/${f.filename}`,
                 }))
               "
               :on-preview="handlePictureCardPreview"
@@ -233,30 +232,19 @@ import { storeToRefs } from 'pinia'
 import { format, parseISO } from 'date-fns'
 import { useFormStore } from '../stores/form'
 import { useInspectionStore } from '../stores/inspection'
-import isFirstDayOfMonth from 'date-fns/isFirstDayOfMonth/index'
 
 const formStore = useFormStore()
 const { forms } = storeToRefs(formStore)
 
 const inspectionStore = useInspectionStore()
-const { inspections } = storeToRefs(inspectionStore)
+const { inspections, isLoading } = storeToRefs(inspectionStore)
 
-const { getForms, getFormById } = formStore
-const {
-  setCreateFormId,
-  getInspections,
-  createInspection,
-  getInspection,
-  updateInspection,
-  uploadFile,
-  getPhotos,
-} = inspectionStore
+const { getForms } = formStore
+const { setCreateFormId, getInspections, getInspection, uploadFile, getFile } =
+  inspectionStore
 
 const router = useRouter()
-const search = ref('')
 const inspection = ref({})
-const labelPosition = ref('right')
-
 const inspectFormDialogRef = ref()
 const showDrawerRef = ref()
 const showInspectFormDialog = ref(false)
@@ -266,9 +254,7 @@ const inspectFormData = ref({
   formId: null,
 })
 
-const pageSize = ref(10)
-const page = ref(1)
-
+const search = ref('')
 const tableData = ref([])
 
 const filterData = () =>
@@ -277,22 +263,10 @@ const filterData = () =>
       !search.value ||
       data.date.includes(search.value) ||
       data.createdAt.includes(search.value) ||
-      data.name.includes(search.value) ||
       data.title.includes(search.value)
   ))
 
 const getFilteredData = computed(() => filterData())
-
-const getTableData = computed(() =>
-  filterData().slice(
-    (page.value - 1) * pageSize.value,
-    page.value * pageSize.value
-  )
-)
-
-const rules = ref({
-  formId: [{ required: true, message: '此欄位不得為空', trigger: 'blur' }],
-})
 
 const statusMap = {
   pass: '合格',
@@ -300,18 +274,34 @@ const statusMap = {
   others: '其他',
 }
 
+onMounted(() => {
+  getForms()
+  getInspections()
+})
+
+const rules = ref({
+  formId: [{ required: true, message: '此欄位不得為空', trigger: 'blur' }],
+})
+
 const dialogImageUrl = ref('')
 const dialogImageVisible = ref(false)
-
 const handlePictureCardPreview = (uploadFile) => {
   dialogImageUrl.value = uploadFile.url
   dialogImageVisible.value = true
 }
 
-onMounted(() => {
-  getForms()
-  getInspections()
-})
+//pagination
+const pageSize = ref(10)
+const page = ref(1)
+const getTableData = computed(() =>
+  filterData().slice(
+    (page.value - 1) * pageSize.value,
+    page.value * pageSize.value
+  )
+)
+const handlePageChange = (p) => {
+  page.value = p
+}
 
 const handleCloseInspectFormDialog = (e) => {
   showInspectFormDialog.value = false
@@ -337,10 +327,6 @@ const handleOpenDrawer = async (e, row) => {
 
 const handleCloseDrawer = (e) => {
   showRecord.value = false
-}
-
-const handlePageChange = (p) => {
-  page.value = p
 }
 
 const imgExt = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg']
