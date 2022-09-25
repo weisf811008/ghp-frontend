@@ -9,7 +9,7 @@
       </div>
     </template>
     <el-input v-model="search" placeholder="Search" />
-    <el-table :data="getTableData" table-layout="auto">
+    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
           {{ scope.$index + (page - 1) * pageSize + 1 }}
@@ -158,11 +158,11 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessageBox, ElNotification } from 'element-plus'
 import { storeToRefs } from 'pinia'
-import { useSchoolStore } from '../stores/school'
+import { useAdminSchoolStore } from '../stores/adminSchool'
 
-const schoolStore = useSchoolStore()
+const schoolStore = useAdminSchoolStore()
 
-const { schools } = storeToRefs(schoolStore)
+const { schools, isLoading } = storeToRefs(schoolStore)
 const { getSchools, createSchool, updateSchool, deleteSchool } = schoolStore
 
 const search = ref('')
