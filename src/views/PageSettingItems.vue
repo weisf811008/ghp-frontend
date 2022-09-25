@@ -9,7 +9,7 @@
       </div>
     </template>
     <el-input v-model="search" placeholder="Search" />
-    <el-table :data="getTableData" table-layout="auto">
+    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
           {{ scope.$index + (page - 1) * pageSize + 1 }}
@@ -27,7 +27,7 @@
       <el-table-column label="週期" prop="period" align="center" width="90" />
       <el-table-column label="區域" prop="area" align="center" width="90" />
       <el-table-column
-        label="條文"
+        label="GHP條文"
         prop="regulations"
         align="center"
         width="90"
@@ -38,34 +38,24 @@
       </el-table-column>
       <el-table-column
         label="訪視表"
-        prop="needVisitingForm"
+        prop="visitingForms"
         align="center"
         width="90"
       >
         <template #default="scope">
-          {{ scope.row.needVisitingForm.join(',') }}
+          {{ scope.row.visitingForms.join(',') }}
         </template>
       </el-table-column>
       <el-table-column
         label="需填資料"
-        prop="needToComment"
+        prop="needCheckValue"
         align="center"
         width="90"
       >
         <template #default="scope">
-          {{ scope.row.needToComment ? '需要' : '不需要' }}
+          {{ scope.row.needCheckValue ? '需要' : '不需要' }}
         </template>
       </el-table-column>
-      <!-- <el-table-column
-        label="每日衛生管理日誌"
-        prop="needJournal"
-        align="center"
-        width="90"
-      >
-        <template #default="scope">
-          {{ scope.row.needJournal ? '列入' : '不列入' }}
-        </template>
-      </el-table-column> -->
       <el-table-column label="操作" align="center" width="200">
         <template #default="scope">
           <el-button
@@ -81,7 +71,6 @@
             text
             icon="Delete"
             @click="handleDeleteItem(scope.row)"
-            width="80px"
           >
             刪除
           </el-button>
@@ -107,7 +96,6 @@
       :model="createData"
       :rules="rules"
       label-width="auto"
-      :label-position="labelPosition"
       status-icon
       hide-required-asterisk
     >
@@ -164,50 +152,44 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="條文" prop="regulations">
+      <el-form-item label="GHP條文" prop="regulations">
         <el-select
           class="formSelect"
           v-model="createData.regulations"
           multiple
-          placeholder="請選擇條文"
+          placeholder="請選擇GHP條文"
         >
           <el-option
             v-for="regulation in regulations"
-            :value="regulation.code"
+            :value="regulation.id"
             :label="regulation.code"
-            :key="`select-regulation-${regulation.code}`"
+            :key="`select-regulation-${regulation.id}`"
           >
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="訪視表條文" prop="needVisitingForms">
+      <el-form-item label="訪視表條文" prop="visitingForms">
         <el-select
           class="formSelect"
-          v-model="createData.needVisitingForms"
+          v-model="createData.visitingForms"
           multiple
           placeholder="請選擇訪視表條文"
         >
           <el-option
-            v-for="needVisitingForm in needVisitingForms"
-            :value="needVisitingForm.code"
-            :label="needVisitingForm.code"
-            :key="`select-needVisitingForm-${needVisitingForm.code}`"
+            v-for="visitingForm in visitingForms"
+            :value="visitingForm.id"
+            :label="visitingForm.code"
+            :key="`select-visitingForm-${visitingForm.id}`"
           >
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="需填資料" prop="needToComment">
-        <el-radio-group v-model="createData.needToComment">
+      <el-form-item label="需填資料" prop="needCheckValue">
+        <el-radio-group v-model="createData.needCheckValue">
           <el-radio :label="true">需要</el-radio>
           <el-radio :label="false">不需要</el-radio>
         </el-radio-group>
       </el-form-item>
-      <!-- <el-form-item label="每日衛生管理日誌" prop="needJournal">
-        <el-radio-group v-model="createData.needJournal">
-          <el-radio :label="true">列入</el-radio>
-          <el-radio :label="false">不列入</el-radio>
-        </el-radio-group>
-      </el-form-item> -->
     </el-form>
     <template #footer>
       <span class="dialog-footer">
@@ -233,7 +215,6 @@
       :model="updateData"
       :rules="rules"
       label-width="auto"
-      :label-position="labelPosition"
       status-icon
       hide-required-asterisk
     >
@@ -290,48 +271,42 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="條文" prop="regulations">
+      <el-form-item label="GHP條文" prop="regulations">
         <el-select
           class="formSelect"
           v-model="updateData.regulations"
           multiple
-          placeholder="請選擇條文"
+          placeholder="請選擇GHP條文"
         >
           <el-option
             v-for="regulation in regulations"
-            :value="regulation.code"
+            :value="regulation.id"
             :label="regulation.code"
-            :key="`update-select-regulation-${regulation.code}`"
+            :key="`update-select-regulation-${regulation.id}`"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="訪視表條文" prop="needVisitingForms">
+      <el-form-item label="訪視表條文" prop="visitingForms">
         <el-select
           class="formSelect"
-          v-model="updateData.needVisitingForms"
+          v-model="updateData.visitingForms"
           multiple
           placeholder="請選擇訪視表條文"
         >
           <el-option
-            v-for="needVisitingForm in needVisitingForms"
-            :value="needVisitingForm.code"
-            :label="needVisitingForm.code"
-            :key="`update-select-needVisitingForm-${needVisitingForm.code}`"
+            v-for="visitingForm in visitingForms"
+            :value="visitingForm.id"
+            :label="visitingForm.code"
+            :key="`update-select-visitingForm-${visitingForm.id}`"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="需填資料" prop="needToComment">
-        <el-radio-group v-model="updateData.needToComment">
+      <el-form-item label="需填資料" prop="needCheckValue">
+        <el-radio-group v-model="updateData.needCheckValue">
           <el-radio :label="true">需要</el-radio>
           <el-radio :label="false">不需要</el-radio>
         </el-radio-group>
       </el-form-item>
-      <!-- <el-form-item label="每日衛生管理日誌" prop="needJournal">
-        <el-radio-group v-model="updateData.needJournal">
-          <el-radio :label="true">列入</el-radio>
-          <el-radio :label="false">不列入</el-radio>
-        </el-radio-group>
-      </el-form-item> -->
     </el-form>
     <template #footer>
       <span class="dialog-footer">
@@ -349,21 +324,26 @@
 </template>
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import { ElMessageBox, ElNotification } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useItemStore } from '../stores/items'
 import { useCategoryStore } from '../stores/categories'
 import { useRegulationStore } from '../stores/regulations'
 import { usePeriodStore } from '../stores/periods'
 import { useAreaStore } from '../stores/areas'
+import { useVisitingFormStore } from '../stores/visitingForms'
 
 const itemStore = useItemStore()
-const { items } = storeToRefs(itemStore)
-const { getItems, createItem, updateItem, deleteItem } = itemStore
+const { items, isLoading } = storeToRefs(itemStore)
+const { getItems, getItemById, createItem, updateItem, deleteItem } = itemStore
 
 const categoryStore = useCategoryStore()
 const { categories } = storeToRefs(categoryStore)
 const { getCategories } = categoryStore
+
+const regulationStore = useRegulationStore()
+const { regulations } = storeToRefs(regulationStore)
+const { getRegulations } = regulationStore
 
 const periodStore = usePeriodStore()
 const { getPeriods } = periodStore
@@ -371,13 +351,12 @@ const { getPeriods } = periodStore
 const areaStore = useAreaStore()
 const { getAreas } = areaStore
 
-const regulationStore = useRegulationStore()
-const { regulations } = storeToRefs(regulationStore)
-const { getRegulations } = regulationStore
+const visitingFormStore = useVisitingFormStore()
+const { visitingForms } = storeToRefs(visitingFormStore)
+const { getVisitingForms } = visitingFormStore
 
 const search = ref('')
 const size = ref('default')
-const labelPosition = ref('right')
 
 const period = ref([])
 const area = ref([])
@@ -395,9 +374,8 @@ const createData = ref({
   period: '',
   area: '',
   regulations: [],
-  needVisitingForms: [],
-  needToComment: true,
-  // needJournal: true,
+  visitingForms: [],
+  needCheckValue: true,
 })
 
 const updateData = ref({
@@ -408,9 +386,8 @@ const updateData = ref({
   period: '',
   area: '',
   regulations: [],
-  needVisitingForms: [],
-  needToComment: true,
-  // needJournal: true,
+  visitingForms: [],
+  needCheckValue: true,
 })
 
 const rules = reactive({
@@ -423,36 +400,10 @@ const rules = reactive({
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
     { max: 4000, message: '最多4000個字元' },
   ],
-  needToComment: [
+  needCheckValue: [
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
   ],
-  needJournal: [{ required: true, message: '此欄位不得為空', trigger: 'blur' }]
 })
-
-const pageSize = ref(10)
-const page = ref(1)
-const tableData = ref([])
-
-const filterData = () =>
-  (tableData.value = items.value.filter(
-    (data) =>
-      !search.value ||
-      data.category.includes(search.value) ||
-      data.no.includes(search.value) ||
-      data.item.includes(search.value) ||
-      data.period.includes(search.value) ||
-      data.area.includes(search.value) ||
-      data.regulations.some((r) => r.includes(search.value)) ||
-      data.needVisitingForms.some((v) => v.includes(search.value))
-  ))
-const getFilteredData = computed(() => filterData())
-
-const getTableData = computed(() =>
-  filterData().slice(
-    (page.value - 1) * pageSize.value,
-    page.value * pageSize.value
-  )
-)
 
 onMounted(async () => {
   getItems()
@@ -460,19 +411,20 @@ onMounted(async () => {
   period.value = await getPeriods()
   area.value = await getAreas()
   getRegulations()
+  getVisitingForms()
 })
 
-const handleShowUpdateDialog = (row) => {
-  updateData.value.id = row.id
-  updateData.value.categoryId = row.categoryId
-  updateData.value.no = row.no
-  updateData.value.item = row.item
-  updateData.value.period = row.period
-  updateData.value.area = row.area
-  updateData.value.regulations = row.regulations
-  updateData.value.needVisitingForms = row.needVisitingForms
-  updateData.value.needToComment = row.needToComment
-  // updateData.value.needJournal = row.needJournal
+const handleShowUpdateDialog = async (row) => {
+  const item = await getItemById(row.id)
+  updateData.value.id = item.id
+  updateData.value.categoryId = item.categoryId
+  updateData.value.no = item.no
+  updateData.value.item = item.item
+  updateData.value.period = item.period
+  updateData.value.area = item.area
+  updateData.value.regulations = item.regulations
+  updateData.value.visitingForms = item.visitingForms
+  updateData.value.needCheckValue = item.needCheckValue
   showUpdateDialog.value = true
 }
 
@@ -481,8 +433,7 @@ const handleCloseCreateDialog = () => {
   createFormRef.value.resetFields()
   createFormRef.value.clearValidate()
   createData.value = {
-    needToComment: true,
-    // needJournal: true,
+    needCheckValue: true,
   }
 }
 
@@ -504,22 +455,20 @@ const handleCreateItem = (e, formRef) => {
           period: createData.value.period,
           area: createData.value.area,
           regulations: createData.value.regulations,
-          needVisitingForms: createData.value.needVisitingForms,
-          needToComment: createData.value.needToComment,
-          // needJournal: createData.value.needJournal,
+          visitingForms: createData.value.visitingForms,
+          needCheckValue: createData.value.needCheckValue,
         }
         await createItem(data)
         handleCloseCreateDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '新增成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '新增失敗',
           type: 'error',
+          message: '新增失敗',
         })
       }
     }
@@ -538,22 +487,20 @@ const handleUpdateItem = (e, formRef) => {
           period: updateData.value.period,
           area: updateData.value.area,
           regulations: updateData.value.regulations,
-          needVisitingForms: updateData.value.needVisitingForms,
-          needToComment: updateData.value.needToComment,
-          // needJournal: updateData.value.needJournal,
+          visitingForms: updateData.value.visitingForms,
+          needCheckValue: updateData.value.needCheckValue,
         }
         await updateItem(updateData.value.id, data)
         handleCloseUpdateDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '修改成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '修改失敗',
           type: 'error',
+          message: '修改失敗',
         })
       }
     }
@@ -569,26 +516,51 @@ const handleDeleteItem = (row) => {
     .then(async () => {
       try {
         await deleteItem(row.id)
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '刪除成功',
         })
       } catch (e) {
         console.error(e)
-        ElMessage({
+        ElNotification({
           type: 'error',
           message: '刪除失敗',
         })
       }
     })
     .catch(() => {
-      ElMessage({
+      ElNotification({
         type: 'info',
         message: '取消刪除',
       })
     })
 }
 
+//pagination
+const pageSize = ref(10)
+const page = ref(1)
+const tableData = ref([])
+
+const filterData = () =>
+  (tableData.value = items.value.filter(
+    (data) =>
+      !search.value ||
+      data.category.includes(search.value) ||
+      data.no.includes(search.value) ||
+      data.item.includes(search.value) ||
+      data.period.includes(search.value) ||
+      data.area.includes(search.value) ||
+      data.regulations.some((r) => r.includes(search.value)) ||
+      data.visitingForms.some((v) => v.includes(search.value))
+  ))
+const getFilteredData = computed(() => filterData())
+
+const getTableData = computed(() =>
+  filterData().slice(
+    (page.value - 1) * pageSize.value,
+    page.value * pageSize.value
+  )
+)
 const handlePageChange = (p) => {
   page.value = p
 }
@@ -619,6 +591,6 @@ const handlePageChange = (p) => {
 }
 
 .formSelect {
-  width: 100vw;
+  width: 100%;
 }
 </style>
