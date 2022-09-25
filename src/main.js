@@ -14,10 +14,26 @@ Object.entries(ElementPlusIconsVue).forEach(([key, component]) =>
   app.component(key, component)
 )
 
-app.use(pinia).use(ElementPlus).use(router)
+// pinia.use((context) => {
+//   const storeId = context.store.$id
+//   const serializer = {
+//     serialize: JSON.stringify,
+//     deserialize: JSON.parse,
+//   }
 
-// pinia.use(({ store }) => {
-//   store.$router = markRaw(router)
+//   const fromStorage = serializer.deserialize(
+//     window.localStorage.getItem(storeId)
+//   )
+
+//   if (fromStorage) {
+//     context.store.$patch(fromStorage)
+//   }
+
+//   context.store.$subscribe((mutation, state) => {
+//     window.localStorage.setItem(storeId, serializer.serialize(state))
+//   })
 // })
+
+app.use(pinia).use(ElementPlus).use(router)
 
 app.mount('#app')

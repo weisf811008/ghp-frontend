@@ -43,7 +43,7 @@
       </template>
       <el-menu-item-group>
         <el-menu-item index="/reports/daily">日報表</el-menu-item>
-        <el-menu-item index="/reports/prodtemp">成品溫度報表</el-menu-item>
+        <el-menu-item index="/reports/prodtemp">成品中心溫度報表</el-menu-item>
         <el-menu-item index="/reports/tnh">
           庫房、食材、檢體保存溫濕度報表
         </el-menu-item>
@@ -61,7 +61,10 @@
         <span>使用者權限</span>
       </template>
       <el-menu-item-group>
-        <el-menu-item index="/settings/schools" v-if="isValid('系統管理員')">
+        <el-menu-item
+          index="/settings/admin/schools"
+          v-if="isValid('系統管理員')"
+        >
           學校管理
         </el-menu-item>
         <el-menu-item

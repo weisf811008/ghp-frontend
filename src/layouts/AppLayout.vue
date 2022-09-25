@@ -9,10 +9,10 @@ import { computed, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const defaultLayout = 'AppAdminLayout'
+const defaultLayout = 'Admin'
 
 const layout = computed(() => {
   const layout = route.meta?.layout || defaultLayout
-  return defineAsyncComponent(() => import(`./${layout}.vue`))
+  return defineAsyncComponent(() => import(`./App${layout}Layout.vue`))
 })
 </script>
