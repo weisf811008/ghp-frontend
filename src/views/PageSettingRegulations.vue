@@ -2,14 +2,14 @@
   <el-card class="box-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <h2>條文管理</h2>
+        <h2>GHP條文管理</h2>
         <el-button @click="() => (showCreateDialog = true)" icon="Plus">
-          新增條文
+          新增GHP條文
         </el-button>
       </div>
     </template>
     <el-input v-model="search" placeholder="Search" />
-    <el-table :data="getTableData" table-layout="auto">
+    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
           {{ scope.$index + (page - 1) * pageSize + 1 }}
@@ -50,7 +50,6 @@
             text
             icon="Delete"
             @click="handleDeleteRegulation(scope.row)"
-            width="80px"
           >
             刪除
           </el-button>
@@ -68,7 +67,7 @@
   <el-dialog
     ref="createDialogRef"
     v-model="showCreateDialog"
-    title="新增條文"
+    title="新增GHP條文"
     :before-close="handleCloseCreateDialog"
   >
     <el-form
@@ -76,7 +75,6 @@
       :model="createData"
       :rules="rules"
       label-width="auto"
-      :label-position="labelPosition"
       status-icon
       hide-required-asterisk
     >
@@ -121,7 +119,7 @@
   <el-dialog
     ref="updateDialogRef"
     v-model="showUpdateDialog"
-    title="修改條文"
+    title="修改GHP條文"
     :before-close="handleCloseUpdateDialog"
   >
     <el-form
@@ -129,7 +127,6 @@
       :model="updateData"
       :rules="rules"
       label-width="auto"
-      :label-position="labelPosition"
       status-icon
       hide-required-asterisk
     >
@@ -174,19 +171,25 @@
 </template>
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import { ElMessageBox, ElNotification } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useRegulationStore } from '../stores/regulations'
 
 const regulationStore = useRegulationStore()
+const { regulations, isLoading } = storeToRefs(regulationStore)
+const {
+  getRegulations,
+  createRegulation,
+  getRegulation,
+  updateRegulation,
+  deleteRegulation,
+} = regulationStore
 
-const { regulations } = storeToRefs(regulationStore)
-const { getRegulations, createRegulation, updateRegulation, deleteRegulation } =
-  regulationStore
+onMounted(() => {
+  getRegulations()
+})
 
 const search = ref('')
-const labelPosition = ref('right')
-
 const showCreateDialog = ref(false)
 const showUpdateDialog = ref(false)
 const createDialogRef = ref()
@@ -194,7 +197,7 @@ const updateFormRef = ref()
 const createFormRef = ref()
 const updateDialogRef = ref()
 const createData = ref({
-  class: '',
+  class: '食品業者一般性規定',
   code: '',
   description: '',
 })
@@ -207,10 +210,7 @@ const updateData = ref({
 })
 
 const rules = reactive({
-  class: [
-    { required: true, message: '此欄位不得為空', trigger: ['blur', 'change'] },
-    { max: 50, message: '最多50個字元' },
-  ],
+  class: [{ required: true, message: '此欄位不得為空', trigger: ['change'] }],
   code: [
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
     { max: 5, message: '最多5個字元' },
@@ -221,36 +221,12 @@ const rules = reactive({
   ],
 })
 
-const pageSize = ref(10)
-const page = ref(1)
-const tableData = ref([])
-
-const filterData = () =>
-  (tableData.value = regulations.value.filter(
-    (data) =>
-      !search.value ||
-      data.class.includes(search.value) ||
-      data.code.includes(search.value) ||
-      data.description.includes(search.value)
-  ))
-const getFilteredData = computed(() => filterData())
-
-const getTableData = computed(() =>
-  filterData().slice(
-    (page.value - 1) * pageSize.value,
-    page.value * pageSize.value
-  )
-)
-
-onMounted(() => {
-  getRegulations()
-})
-
-const handleShowUpdateDialog = (row) => {
-  updateData.value.id = row.id
-  updateData.value.class = row.class
-  updateData.value.code = row.code
-  updateData.value.description = row.description
+const handleShowUpdateDialog = async (row) => {
+  const item = await getRegulation(row.id)
+  updateData.value.id = item.id
+  updateData.value.class = item.class
+  updateData.value.code = item.code
+  updateData.value.description = item.description
   showUpdateDialog.value = true
 }
 
@@ -273,16 +249,15 @@ const handleCreateRegulation = (e, formRef) => {
       try {
         await createRegulation(createData.value)
         handleCloseCreateDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '新增成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
-          message: '新增失敗',
           type: 'error',
+          message: '新增失敗',
         })
       }
     }
@@ -300,14 +275,13 @@ const handleUpdateRegulation = (e, formRef) => {
           description: updateData.value.description,
         })
         handleCloseUpdateDialog()
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '修改成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
-          title: 'Error',
           message: '修改失敗',
           type: 'error',
         })
@@ -325,26 +299,46 @@ const handleDeleteRegulation = (row) => {
     .then(async () => {
       try {
         await deleteRegulation(row.id)
-        ElMessage({
+        ElNotification({
           type: 'success',
           message: '刪除成功',
         })
       } catch (e) {
         console.error(e)
-        ElMessage({
+        ElNotification({
           type: 'error',
           message: '刪除失敗',
         })
       }
     })
     .catch(() => {
-      ElMessage({
+      ElNotification({
         type: 'info',
         message: '取消刪除',
       })
     })
 }
 
+//pagination
+const pageSize = ref(10)
+const page = ref(1)
+const tableData = ref([])
+
+const filterData = () =>
+  (tableData.value = regulations.value.filter(
+    (data) =>
+      !search.value ||
+      data.class.includes(search.value) ||
+      data.code.includes(search.value) ||
+      data.description.includes(search.value)
+  ))
+const getFilteredData = computed(() => filterData())
+const getTableData = computed(() =>
+  filterData().slice(
+    (page.value - 1) * pageSize.value,
+    page.value * pageSize.value
+  )
+)
 const handlePageChange = (p) => {
   page.value = p
 }
@@ -378,5 +372,4 @@ const handlePageChange = (p) => {
     }
   }
 }
-
 </style>
