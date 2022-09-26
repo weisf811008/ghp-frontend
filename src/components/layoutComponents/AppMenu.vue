@@ -102,8 +102,8 @@
 </template>
 <script setup>
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from '../stores/auth'
-import { useMenuStore } from '../stores/menu'
+import { useAuthStore } from '../../stores/auth'
+import { useMenuStore } from '../../stores/menu'
 
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
