@@ -2,12 +2,13 @@
   <el-card class="box-card" shadow="never">
     <template #header>
       <div class="card-header">
-        <h2>日報表</h2>
+        <h2>每日衛生管理日誌</h2>
         <div class="block">
           <span class="selectDate">請選擇日期區間</span>
           <el-date-picker
             v-model="dates"
             type="daterange"
+            size="large"
             :disabled-date="disabledDate"
             unlink-panels
             range-separator="To"
@@ -16,7 +17,7 @@
             :shortcuts="shortcuts"
             @change="getReports"
           />
-          <el-button type="primary" @click="handleDownload">
+          <el-button type="primary" size="large" @click="handleDownload">
             下載Excel
           </el-button>
         </div>
@@ -62,7 +63,7 @@
       class="pages"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="items.length"
+      :total="reportItems.length"
       @current-change="handlePageChange"
     />
   </el-card>
@@ -135,6 +136,9 @@ const getPeriodInDays = computed(
   () => differenceInDays(new Date(dates.value[1]), new Date(dates.value[0])) + 1
 )
 
+const getReportItems = () => items.value.filter((item) => item.needDaily)
+const reportItems = computed(getReportItems)
+
 const getReports = async () => {
   reports.value = await getReportDaily(
     dates.value[0].toISOString(),
@@ -202,7 +206,7 @@ const handleDownload = () => {
       ...dateArr.map((d) => format(d, 'MM/dd')),
       '備註',
     ],
-    ...items.value.map((it, i) => {
+    ...getReportItems().map((it, i) => {
       return [
         i + 1,
         it.category,
@@ -233,22 +237,22 @@ const handleDownload = () => {
     // header rows
     { s: { c: 2, r: 3 }, e: { c: 3, r: 3 } },
     // data rows
-    ...items.value.map((v, i) => ({
+    ...getReportItems().map((v, i) => ({
       s: { c: 2, r: 4 + i },
       e: { c: 3, r: 4 + i },
     })),
     //footer row
     {
-      s: { c: 0, r: 4 + items.value.length },
-      e: { c: 2, r: 4 + items.value.length },
+      s: { c: 0, r: 4 + getReportItems().length },
+      e: { c: 2, r: 4 + getReportItems().length },
     },
     {
-      s: { c: 3, r: 4 + items.value.length },
-      e: { c: 6, r: 4 + items.value.length },
+      s: { c: 3, r: 4 + getReportItems().length },
+      e: { c: 6, r: 4 + getReportItems().length },
     },
     {
-      s: { c: 7, r: 4 + items.value.length },
-      e: { c: 10, r: 4 + items.value.length },
+      s: { c: 7, r: 4 + getReportItems().length },
+      e: { c: 10, r: 4 + getReportItems().length },
     },
   ]
   ws['!cols'] = [
@@ -266,9 +270,9 @@ const handleDownload = () => {
   ]
 
   const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, ws, `${sheetDate}日報表`)
+  XLSX.utils.book_append_sheet(wb, ws, `${sheetDate}每日衛生管理日誌`)
 
-  XLSX.writeFile(wb, `${sheetDate}日報表.xlsx`)
+  XLSX.writeFile(wb, `${sheetDate}每日衛生管理日誌.xlsx`)
 }
 
 //pagination
@@ -280,7 +284,7 @@ const handlePageChange = (p) => {
 }
 
 const getTableData = computed(() =>
-  items.value.slice(
+  getReportItems().slice(
     (page.value - 1) * pageSize.value,
     page.value * pageSize.value
   )
@@ -289,13 +293,14 @@ const getTableData = computed(() =>
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
   overflow-x: hidden;
 
   .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
 
     .block {
       display: flex;
