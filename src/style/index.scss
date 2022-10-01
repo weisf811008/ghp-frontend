@@ -1,0 +1,34 @@
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+
+  .box-card {
+    min-width: 350px;
+    overflow-x: hidden;
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+
+      h2 {
+        margin: 0;
+      }
+    }
+    .pages {
+      justify-content: flex-end;
+    }
+  }
+  .pass {
+    color: #67c23a;
+  }
+
+  .fail {
+    color: #f56c6c;
+  }
+
+  .others {
+    color: #e6a23c;
+  }
+}
