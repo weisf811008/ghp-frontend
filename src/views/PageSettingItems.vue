@@ -3,12 +3,16 @@
     <template #header>
       <div class="card-header">
         <h2>檢核細項主檔</h2>
-        <el-button @click="() => (showCreateDialog = true)" icon="Plus">
+        <el-button
+          size="large"
+          @click="() => (handleShowCreateDialog = true)"
+          icon="Plus"
+        >
           新增細項
         </el-button>
       </div>
     </template>
-    <el-input v-model="search" placeholder="Search" />
+    <el-input v-model="search" placeholder="Search" size="large" />
     <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
@@ -56,11 +60,22 @@
           {{ scope.row.needCheckValue ? '需要' : '不需要' }}
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="200">
+      <el-table-column
+        label="每日衛生管理日誌"
+        prop="needDaily"
+        align="center"
+        width="90"
+      >
+        <template #default="scope">
+          {{ scope.row.needDaily ? '列入' : '不列入' }}
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" align="center" width="220">
         <template #default="scope">
           <el-button
             type="primary"
             text
+            size="large"
             icon="EditPen"
             @click="handleShowUpdateDialog(scope.row)"
           >
@@ -69,6 +84,7 @@
           <el-button
             type="danger"
             text
+            size="large"
             icon="Delete"
             @click="handleDeleteItem(scope.row)"
           >
@@ -87,7 +103,7 @@
   </el-card>
   <el-dialog
     ref="createDialogRef"
-    v-model="showCreateDialog"
+    v-model="handleShowCreateDialog"
     title="新增細項"
     :before-close="handleCloseCreateDialog"
   >
@@ -102,6 +118,7 @@
       <el-form-item label="檢核大項" prop="categoryId">
         <el-select
           class="formSelect"
+          size="large"
           v-model="createData.categoryId"
           placeholder="選擇大項"
         >
@@ -127,6 +144,7 @@
       <el-form-item label="週期" prop="period">
         <el-select
           class="formSelect"
+          size="large"
           v-model="createData.period"
           placeholder="選擇週期"
         >
@@ -141,6 +159,7 @@
       <el-form-item label="區域" prop="area">
         <el-select
           class="formSelect"
+          size="large"
           v-model="createData.area"
           placeholder="請選擇或輸入區域"
         >
@@ -155,6 +174,7 @@
       <el-form-item label="GHP條文" prop="regulations">
         <el-select
           class="formSelect"
+          size="large"
           v-model="createData.regulations"
           multiple
           placeholder="請選擇GHP條文"
@@ -171,6 +191,7 @@
       <el-form-item label="訪視表條文" prop="visitingForms">
         <el-select
           class="formSelect"
+          size="large"
           v-model="createData.visitingForms"
           multiple
           placeholder="請選擇訪視表條文"
@@ -190,14 +211,25 @@
           <el-radio :label="false">不需要</el-radio>
         </el-radio-group>
       </el-form-item>
+      <el-form-item label="每日衛生管理日誌" prop="needDaily">
+        <el-radio-group v-model="createData.needDaily">
+          <el-radio :label="true">列入</el-radio>
+          <el-radio :label="false">不列入</el-radio>
+        </el-radio-group>
+      </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="danger" text @click="handleCloseCreateDialog"
+        <el-button
+          type="danger"
+          text
+          size="large"
+          @click="handleCloseCreateDialog"
           >取消
         </el-button>
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleCreateItem(e, createFormRef)"
           >送出
         </el-button>
@@ -221,6 +253,7 @@
       <el-form-item label="檢核大項" prop="categoryId">
         <el-select
           class="formSelect"
+          size="large"
           v-model="updateData.categoryId"
           placeholder="選擇大項"
         >
@@ -246,6 +279,7 @@
       <el-form-item label="週期" prop="period">
         <el-select
           class="formSelect"
+          size="large"
           v-model="updateData.period"
           placeholder="請選擇或輸入週期"
         >
@@ -260,6 +294,7 @@
       <el-form-item label="區域" prop="area">
         <el-select
           class="formSelect"
+          size="large"
           v-model="updateData.area"
           placeholder="請選擇或輸入區域"
         >
@@ -274,6 +309,7 @@
       <el-form-item label="GHP條文" prop="regulations">
         <el-select
           class="formSelect"
+          size="large"
           v-model="updateData.regulations"
           multiple
           placeholder="請選擇GHP條文"
@@ -289,6 +325,7 @@
       <el-form-item label="訪視表條文" prop="visitingForms">
         <el-select
           class="formSelect"
+          size="large"
           v-model="updateData.visitingForms"
           multiple
           placeholder="請選擇訪視表條文"
@@ -307,14 +344,25 @@
           <el-radio :label="false">不需要</el-radio>
         </el-radio-group>
       </el-form-item>
+      <el-form-item label="每日衛生管理日誌" prop="needDaily">
+        <el-radio-group v-model="updateData.needDaily">
+          <el-radio :label="true">列入</el-radio>
+          <el-radio :label="false">不列入</el-radio>
+        </el-radio-group>
+      </el-form-item>
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="danger" text @click="handleCloseUpdateDialog"
+        <el-button
+          type="danger"
+          text
+          size="large"
+          @click="handleCloseUpdateDialog"
           >取消
         </el-button>
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleUpdateItem(e, updateFormRef)"
           >送出
         </el-button>
@@ -361,7 +409,7 @@ const size = ref('default')
 const period = ref([])
 const area = ref([])
 
-const showCreateDialog = ref(false)
+const handleShowCreateDialog = ref(false)
 const showUpdateDialog = ref(false)
 const createDialogRef = ref()
 const updateDialogRef = ref()
@@ -376,6 +424,7 @@ const createData = ref({
   regulations: [],
   visitingForms: [],
   needCheckValue: true,
+  needDaily: true,
 })
 
 const updateData = ref({
@@ -388,6 +437,7 @@ const updateData = ref({
   regulations: [],
   visitingForms: [],
   needCheckValue: true,
+  needDaily: true,
 })
 
 const rules = reactive({
@@ -399,9 +449,6 @@ const rules = reactive({
   item: [
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
     { max: 4000, message: '最多4000個字元' },
-  ],
-  needCheckValue: [
-    { required: true, message: '此欄位不得為空', trigger: 'blur' },
   ],
 })
 
@@ -425,15 +472,17 @@ const handleShowUpdateDialog = async (row) => {
   updateData.value.regulations = item.regulations
   updateData.value.visitingForms = item.visitingForms
   updateData.value.needCheckValue = item.needCheckValue
+  updateData.value.needDaily = item.needDaily
   showUpdateDialog.value = true
 }
 
 const handleCloseCreateDialog = () => {
-  showCreateDialog.value = false
+  handleShowCreateDialog.value = false
   createFormRef.value.resetFields()
   createFormRef.value.clearValidate()
   createData.value = {
     needCheckValue: true,
+    needDaily: true,
   }
 }
 
@@ -457,6 +506,7 @@ const handleCreateItem = (e, formRef) => {
           regulations: createData.value.regulations,
           visitingForms: createData.value.visitingForms,
           needCheckValue: createData.value.needCheckValue,
+          needDaily: createData.value.needDaily,
         }
         await createItem(data)
         handleCloseCreateDialog()
@@ -489,6 +539,7 @@ const handleUpdateItem = (e, formRef) => {
           regulations: updateData.value.regulations,
           visitingForms: updateData.value.visitingForms,
           needCheckValue: updateData.value.needCheckValue,
+          needDaily: updateData.value.needDaily,
         }
         await updateItem(updateData.value.id, data)
         handleCloseUpdateDialog()
@@ -568,7 +619,7 @@ const handlePageChange = (p) => {
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
 
   .card-header {
     display: flex;
