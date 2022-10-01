@@ -133,6 +133,9 @@
       status-icon
       hide-required-asterisk
     >
+      <el-form-item label="編號" prop="code">
+        {{ updateData.code }}
+      </el-form-item>
       <el-form-item label="類別" prop="class">
         <el-select
           class="formSelect"
@@ -142,9 +145,6 @@
         >
           <el-option label="衛生訪視內容" value="衛生訪視內容" />
         </el-select>
-      </el-form-item>
-      <el-form-item label="編號" prop="code">
-        <el-input v-model="updateData.code" placeholder="請輸入編號" />
       </el-form-item>
       <el-form-item label="訪視項目" prop="description">
         <el-input
@@ -355,31 +355,13 @@ const handlePageChange = (p) => {
 </script>
 
 <style lang="scss" scoped>
-.box-card {
-  min-width: 350px;
+.formSelect {
+  width: 100vw;
+}
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h2 {
-      margin: 0;
-    }
-  }
-
-  .formSelect {
-    width: 100vw;
-  }
-
-  .pages {
-    justify-content: flex-end;
-  }
-
-  .dialog-footer {
-    button:first-child {
-      margin-right: 10px;
-    }
+.dialog-footer {
+  button:first-child {
+    margin-right: 10px;
   }
 }
 </style>
