@@ -486,36 +486,6 @@ const isImage = computed(() =>
 </script>
 
 <style lang="scss" scoped>
-.box-card {
-  min-width: 350px;
-
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h2 {
-      margin: 0;
-    }
-  }
-
-  .pages {
-    justify-content: flex-end;
-  }
-}
-
-.pass {
-  color: #67c23a;
-}
-
-.fail {
-  color: #f56c6c;
-}
-
-.others {
-  color: #e6a23c;
-}
-
 :deep(div.el-upload.el-upload--picture-card) {
   display: none;
 }

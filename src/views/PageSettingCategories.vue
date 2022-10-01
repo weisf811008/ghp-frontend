@@ -68,18 +68,4 @@ const showUpdateDialog = async (id) => {
 getCategories()
 </script>
 
-<style lang="scss" scoped>
-.box-card {
-  min-width: 480px;
-
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h2 {
-      margin: 0;
-    }
-  }
-}
-</style>
+<style lang="scss" scoped></style>

@@ -366,26 +366,9 @@ const handleDeleteForm = (row) => {
 </script>
 
 <style lang="scss" scoped>
-.box-card {
-  min-width: 350px;
-
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h2 {
-      margin: 0;
-    }
-  }
-
-  .pages {
-    justify-content: flex-end;
-  }
-  .dialog-footer {
-    button:first-child {
-      margin-right: 10px;
-    }
+.dialog-footer {
+  button:first-child {
+    margin-right: 10px;
   }
 }
 
