@@ -3,13 +3,22 @@
     <template #header>
       <div class="card-header">
         <h2>巡檢紀錄</h2>
-        <el-button @click="() => (showInspectFormDialog = true)" icon="Plus">
+        <el-button
+          size="large"
+          @click="() => (showInspectFormDialog = true)"
+          icon="Plus"
+        >
           巡檢紀錄填報
         </el-button>
       </div>
     </template>
-    <el-input v-model="search" placeholder="Search" />
-    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
+    <el-input v-model="search" placeholder="Search" size="large" />
+    <el-table
+      :data="getTableData"
+      v-loading="isLoading"
+      table-layout="auto"
+      class="hidden-sm-and-down"
+    >
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
           {{ scope.$index + (page - 1) * pageSize + 1 }}
@@ -36,11 +45,12 @@
           {{ scope.row.inspectedBy.name }}
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="250">
+      <el-table-column label="操作" align="center" width="220">
         <template #default="scope">
           <el-button
             type="info"
             text
+            size="large"
             icon="Document"
             @click="(e) => handleOpenDrawer(e, scope.row)"
           >
@@ -49,6 +59,7 @@
           <!-- <el-button
             type="warning"
             text
+            size="large"
             icon="Edit"
             @click="
               () =>
@@ -63,6 +74,44 @@
         </template>
       </el-table-column>
     </el-table>
+    <div class="mb hidden-md-only hidden-lg-only hidden-xl-only">
+      <el-card
+        class="mb-card"
+        v-for="(row, index) in getTableData"
+        :key="`insp-sm-${row.id}`"
+      >
+        <el-descriptions :column="1">
+          <el-descriptions-item label="#">
+            {{ index + (page - 1) * pageSize + 1 }}
+          </el-descriptions-item>
+          <el-descriptions-item label="巡檢日期">
+            {{ format(parseISO(row.date), 'yyyy/MM/dd') }}
+          </el-descriptions-item>
+          <el-descriptions-item label="巡檢表單">
+            {{ row.title }}
+          </el-descriptions-item>
+          <el-descriptions-item label="填報時間">
+            {{ format(parseISO(row.createdAt), 'yyyy/MM/dd HH:mm') }}
+          </el-descriptions-item>
+          <el-descriptions-item label="巡檢人員">
+            {{ row.inspectedBy.name }}
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <el-button
+              type="info"
+              text
+              bg
+              size="large"
+              class="mb-button"
+              icon="Document"
+              @click="(e) => handleOpenDrawer(e, row)"
+            >
+              查看巡檢紀錄
+            </el-button>
+          </el-descriptions-item>
+        </el-descriptions>
+      </el-card>
+    </div>
     <el-pagination
       class="pages"
       layout="prev, pager, next"
@@ -72,10 +121,11 @@
     />
   </el-card>
   <el-dialog
-    ref="inspectFormDialogRef"
     v-model="showInspectFormDialog"
     title="選擇巡檢表單"
+    width="100%"
     :before-close="handleCloseInspectFormDialog"
+    style="max-width: 550px"
   >
     <el-form
       ref="inspectFormRef"
@@ -88,6 +138,7 @@
       <el-form-item label="選擇表單" prop="formId">
         <el-select
           class="formSelect"
+          size="large"
           v-model="inspectFormData.formId"
           placeholder="選擇表單"
         >
@@ -101,112 +152,211 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <span class="dialog-footer">
-        <el-button type="danger" text @click="handleCloseInspectFormDialog"
+      <span class="mb-footer-button">
+        <el-button
+          type="danger"
+          text
+          size="large"
+          class="cancel-button"
+          @click="handleCloseInspectFormDialog"
           >取消
         </el-button>
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleOpenInspectForm(e, inspectFormRef)"
           >送出
         </el-button>
       </span>
     </template>
   </el-dialog>
-
-  <el-drawer
-    ref="showDrawerRef"
-    v-model="showRecord"
-    title="查看巡檢紀錄"
-    size="80%"
-    :before-close="handleCloseDrawer"
-  >
-    <el-descriptions border :column="2">
-      <el-descriptions-item label="表單名稱" :span="2">
-        {{ inspection.title }}
-      </el-descriptions-item>
-      <el-descriptions-item label="巡檢日期">
-        {{ inspection.date && format(parseISO(inspection.date), 'yyyy/MM/dd') }}
-      </el-descriptions-item>
-      <el-descriptions-item label="限期改善日期">
-        {{
-          inspection.dueDate &&
-          format(parseISO(inspection.dueDate), 'yyyy/MM/dd')
-        }}
-      </el-descriptions-item>
-      <el-descriptions-item label="巡檢人員">
-        {{ inspection.inspectedBy.name }}
-      </el-descriptions-item>
-      <el-descriptions-item label="填報時間">
-        {{
-          inspection.createdAt &&
-          format(parseISO(inspection.createdAt), 'yyyy/MM/dd HH:mm')
-        }}
-      </el-descriptions-item>
-      <el-descriptions-item label="備註">
-        {{ inspection.remarks }}
-      </el-descriptions-item>
-    </el-descriptions>
-    <el-table
-      :data="inspection.details"
-      style="width: 100%"
-      :default-expand-all="true"
+  <div class="hidden-sm-and-down">
+    <el-drawer
+      ref="showDrawerRef"
+      v-model="showRecord"
+      title="查看巡檢紀錄"
+      size="80%"
+      :before-close="handleCloseDrawer"
     >
-      <el-table-column label="項次" fixed align="center" width="60">
-        <template #default="scope">
-          {{ scope.$index + 1 }}
-        </template>
-      </el-table-column>
-      <el-table-column label="檢核大項" prop="category" width="170" />
-      <el-table-column label="檢核細項" prop="item" />
-      <el-table-column
-        label="測量值"
-        prop="checkValue"
-        align="center"
-        width="90"
-      />
-      <el-table-column
-        label="檢核結果"
-        prop="status"
-        align="center"
-        width="230"
+      <el-descriptions border :column="2">
+        <el-descriptions-item label="表單名稱" :span="2">
+          {{ inspection.title }}
+        </el-descriptions-item>
+        <el-descriptions-item label="巡檢日期">
+          {{
+            inspection.date && format(parseISO(inspection.date), 'yyyy/MM/dd')
+          }}
+        </el-descriptions-item>
+        <el-descriptions-item label="限期改善日期">
+          {{
+            inspection.dueDate &&
+            format(parseISO(inspection.dueDate), 'yyyy/MM/dd')
+          }}
+        </el-descriptions-item>
+        <el-descriptions-item label="巡檢人員">
+          {{ inspection.inspectedBy.name }}
+        </el-descriptions-item>
+        <el-descriptions-item label="填報時間">
+          {{
+            inspection.createdAt &&
+            format(parseISO(inspection.createdAt), 'yyyy/MM/dd HH:mm')
+          }}
+        </el-descriptions-item>
+        <el-descriptions-item label="備註">
+          {{ inspection.remarks }}
+        </el-descriptions-item>
+      </el-descriptions>
+      <el-table
+        :data="inspection.details"
+        style="width: 100%"
+        :default-expand-all="true"
       >
-        <template #default="scope">
-          <span
-            :class="{
-              pass: scope.row.status === 'pass',
-              fail: scope.row.status === 'fail',
-              others: scope.row.status === 'others',
-            }"
-          >
-            {{ statusMap[scope.row.status] }}
-          </span>
-        </template>
-      </el-table-column>
-      <el-table-column type="expand">
-        <template #default="scope">
-          <div>
-            <el-card>
-              {{ scope.row.remarks }}
-            </el-card>
-          </div>
-          <div>
-            <el-upload
-              :file-list="
-                scope.row.files.map((f) => ({
-                  name: f.originalname,
-                  url: `/api/inspections/files/${f.filename}`,
-                }))
-              "
-              :on-preview="handlePictureCardPreview"
-              list-type="picture-card"
-              disabled
-            />
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
-  </el-drawer>
+        <el-table-column label="項次" fixed align="center" width="60">
+          <template #default="scope">
+            {{ scope.$index + 1 }}
+          </template>
+        </el-table-column>
+        <el-table-column label="檢核大項" prop="category" width="170" />
+        <el-table-column label="檢核細項" prop="item" />
+        <el-table-column
+          label="測量值"
+          prop="checkValue"
+          align="center"
+          width="90"
+        />
+        <el-table-column
+          label="檢核結果"
+          prop="status"
+          align="center"
+          width="230"
+        >
+          <template #default="scope">
+            <span
+              :class="{
+                pass: scope.row.status === 'pass',
+                fail: scope.row.status === 'fail',
+                others: scope.row.status === 'others',
+              }"
+            >
+              {{ statusMap[scope.row.status] }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column type="expand">
+          <template #default="scope">
+            <div>
+              <el-card>
+                {{ scope.row.remarks }}
+              </el-card>
+            </div>
+            <div>
+              <el-upload
+                :file-list="
+                  scope.row.files.map((f) => ({
+                    name: f.originalname,
+                    url: `/api/inspections/files/${f.filename}`,
+                  }))
+                "
+                :on-preview="handlePictureCardPreview"
+                list-type="picture-card"
+                disabled
+              />
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-drawer>
+  </div>
+  <div class="hidden-md-and-up">
+    <el-drawer
+      ref="showDrawerRef"
+      v-model="showRecord"
+      title="查看巡檢紀錄"
+      size="100%"
+      :before-close="handleCloseDrawer"
+    >
+      <el-descriptions border :column="1">
+        <el-descriptions-item label="表單名稱">
+          {{ inspection.title }}
+        </el-descriptions-item>
+        <el-descriptions-item label="巡檢日期">
+          {{
+            inspection.date && format(parseISO(inspection.date), 'yyyy/MM/dd')
+          }}
+        </el-descriptions-item>
+        <el-descriptions-item label="限期改善日期">
+          {{
+            inspection.dueDate &&
+            format(parseISO(inspection.dueDate), 'yyyy/MM/dd')
+          }}
+        </el-descriptions-item>
+        <el-descriptions-item label="巡檢人員">
+          {{ inspection.inspectedBy.name }}
+        </el-descriptions-item>
+        <el-descriptions-item label="填報時間">
+          {{
+            inspection.createdAt &&
+            format(parseISO(inspection.createdAt), 'yyyy/MM/dd HH:mm')
+          }}
+        </el-descriptions-item>
+        <el-descriptions-item label="備註">
+          {{ inspection.remarks }}
+        </el-descriptions-item>
+      </el-descriptions>
+      <el-card
+        v-for="(row, index) in inspection.details"
+        :key="`insp-mb-${row.id}`"
+        class="mb-card"
+      >
+        <el-descriptions :column="1">
+          <el-descriptions-item label="#">
+            {{ index + (page - 1) * pageSize + 1 }}
+          </el-descriptions-item>
+          <el-descriptions-item label="檢核大項">
+            {{ row.category }}
+          </el-descriptions-item>
+          <el-descriptions-item label="檢核細項">
+            {{ row.item }}
+          </el-descriptions-item>
+          <el-descriptions-item label="測量值">
+            {{ row.checkValue }}
+          </el-descriptions-item>
+          <el-descriptions-item label="檢核結果">
+            <span
+              :class="{
+                pass: row.status === 'pass',
+                fail: row.status === 'fail',
+                others: row.status === 'others',
+              }"
+            >
+              {{ statusMap[row.status] }}
+            </span>
+          </el-descriptions-item>
+          <el-descriptions-item>
+            <div>
+              <el-card>
+                {{ row.remarks }}
+              </el-card>
+            </div>
+            <div>
+              <el-upload
+                :file-list="
+                  row.files.map((f) => ({
+                    name: f.originalname,
+                    url: `/api/inspections/files/${f.filename}`,
+                  }))
+                "
+                :on-preview="handlePictureCardPreview"
+                list-type="picture-card"
+                disabled
+              />
+            </div>
+          </el-descriptions-item>
+        </el-descriptions>
+      </el-card>
+    </el-drawer>
+  </div>
+
   <el-dialog v-model="dialogImageVisible">
     <img
       v-if="isImage"
@@ -245,7 +395,6 @@ const { setCreateFormId, getInspections, getInspection, uploadFile, getFile } =
 
 const router = useRouter()
 const inspection = ref({})
-const inspectFormDialogRef = ref()
 const showDrawerRef = ref()
 const showInspectFormDialog = ref(false)
 const showRecord = ref(false)
@@ -338,7 +487,7 @@ const isImage = computed(() =>
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
 
   .card-header {
     display: flex;
@@ -369,5 +518,26 @@ const isImage = computed(() =>
 
 :deep(div.el-upload.el-upload--picture-card) {
   display: none;
+}
+
+@media screen and (max-width: 991px) {
+  .mb-card {
+    margin: 10px 0;
+  }
+  .mb-button {
+    width: 100%;
+  }
+
+  .mb-footer-button {
+    display: flex;
+    width: 100%;
+    .cancel-button {
+      background-color: #f0f2f5;
+    }
+
+    .el-button {
+      width: 50%;
+    }
+  }
 }
 </style>
