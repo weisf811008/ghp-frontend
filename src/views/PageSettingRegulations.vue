@@ -3,12 +3,16 @@
     <template #header>
       <div class="card-header">
         <h2>GHP條文管理</h2>
-        <el-button @click="() => (showCreateDialog = true)" icon="Plus">
+        <el-button
+          size="large"
+          @click="() => (handleShowCreateDialog = true)"
+          icon="Plus"
+        >
           新增GHP條文
         </el-button>
       </div>
     </template>
-    <el-input v-model="search" placeholder="Search" />
+    <el-input v-model="search" placeholder="Search" size="large" />
     <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
@@ -35,11 +39,12 @@
         fixed
       />
 
-      <el-table-column label="操作" align="center" width="200">
+      <el-table-column label="操作" align="center" width="220">
         <template #default="scope">
           <el-button
             type="primary"
             text
+            size="large"
             icon="EditPen"
             @click="handleShowUpdateDialog(scope.row)"
           >
@@ -48,6 +53,7 @@
           <el-button
             type="danger"
             text
+            size="large"
             icon="Delete"
             @click="handleDeleteRegulation(scope.row)"
           >
@@ -66,7 +72,7 @@
   </el-card>
   <el-dialog
     ref="createDialogRef"
-    v-model="showCreateDialog"
+    v-model="handleShowCreateDialog"
     title="新增GHP條文"
     :before-close="handleCloseCreateDialog"
   >
@@ -81,6 +87,7 @@
       <el-form-item label="類別" prop="class">
         <el-select
           class="formSelect"
+          size="large"
           v-model="createData.class"
           placeholder="選擇類別"
         >
@@ -105,11 +112,16 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="danger" text @click="handleCloseCreateDialog"
+        <el-button
+          type="danger"
+          text
+          size="large"
+          @click="handleCloseCreateDialog"
           >取消
         </el-button>
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleCreateRegulation(e, createFormRef)"
           >送出
         </el-button>
@@ -133,6 +145,7 @@
       <el-form-item label="類別" prop="class">
         <el-select
           class="formSelect"
+          size="large"
           v-model="updateData.class"
           placeholder="選擇類別"
         >
@@ -157,11 +170,16 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="danger" text @click="handleCloseUpdateDialog"
+        <el-button
+          type="danger"
+          text
+          size="large"
+          @click="handleCloseUpdateDialog"
           >取消
         </el-button>
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleUpdateRegulation(e, updateFormRef)"
           >送出
         </el-button>
@@ -190,7 +208,7 @@ onMounted(() => {
 })
 
 const search = ref('')
-const showCreateDialog = ref(false)
+const handleShowCreateDialog = ref(false)
 const showUpdateDialog = ref(false)
 const createDialogRef = ref()
 const updateFormRef = ref()
@@ -231,7 +249,7 @@ const handleShowUpdateDialog = async (row) => {
 }
 
 const handleCloseCreateDialog = () => {
-  showCreateDialog.value = false
+  handleShowCreateDialog.value = false
   createFormRef.value.resetFields()
   createFormRef.value.clearValidate()
 }
@@ -346,7 +364,7 @@ const handlePageChange = (p) => {
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
 
   .card-header {
     display: flex;

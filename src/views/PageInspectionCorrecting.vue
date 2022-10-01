@@ -18,6 +18,7 @@
           <el-date-picker
             v-model="updateData.date"
             type="date"
+            size="large"
             value-format="YYYY-MM-DD"
             :disabled-date="disabledDate"
             :shortcuts="shortcuts"
@@ -146,16 +147,23 @@
             <el-date-picker
               v-model="updateData.dueDate"
               type="date"
+              size="large"
               value-format="YYYY-MM-DD"
               :disabled-date="disabledDueDate"
               :shortcuts="shortcuts"
             />
           </el-form-item>
-          <el-button type="danger" text @click="handleCloseInspectForm">
+          <el-button
+            type="danger"
+            text
+            size="large"
+            @click="handleCloseInspectForm"
+          >
             取消
           </el-button>
           <el-button
             type="primary"
+            size="large"
             @click="(e) => handleSubmitInspectForm(e, submitFormRef)"
           >
             送出
@@ -369,7 +377,7 @@ const handleSubmitInspectForm = async (e, formRef) => {
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
   margin-bottom: 20px;
 
   .card-header {

@@ -3,12 +3,16 @@
     <template #header>
       <div class="card-header">
         <h2>學校管理</h2>
-        <el-button @click="() => (showCreateDialog = true)" icon="Plus">
+        <el-button
+          size="large"
+          @click="() => (handleShowCreateDialog = true)"
+          icon="Plus"
+        >
           新增學校
         </el-button>
       </div>
     </template>
-    <el-input v-model="search" placeholder="Search" />
+    <el-input v-model="search" placeholder="Search" size="large" />
     <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
@@ -34,11 +38,12 @@
       <el-table-column label="地址" prop="address" />
       <el-table-column label="電話" prop="phone" align="center" width="150" />
       <el-table-column label="URL" prop="url" align="center" width="300" />
-      <el-table-column label="操作" align="center" width="200">
+      <el-table-column label="操作" align="center" width="220">
         <template #default="scope">
           <el-button
             type="primary"
             text
+            size="large"
             icon="EditPen"
             @click="handleShowUpdateDialog(scope.row)"
           >
@@ -47,6 +52,7 @@
           <el-button
             type="danger"
             text
+            size="large"
             icon="Delete"
             @click="handleDeleteSchool(scope.row)"
           >
@@ -65,7 +71,7 @@
   </el-card>
   <el-dialog
     ref="createDialogRef"
-    v-model="showCreateDialog"
+    v-model="handleShowCreateDialog"
     title="新增學校"
     :before-close="handleCloseCreateDialog"
   >
@@ -99,11 +105,16 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="danger" text @click="handleCloseCreateDialog"
+        <el-button
+          type="danger"
+          text
+          size="large"
+          @click="handleCloseCreateDialog"
           >取消
         </el-button>
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleCreateSchool(e, createFormRef)"
           >送出
         </el-button>
@@ -142,11 +153,16 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="danger" text @click="handleCloseUpdateDialog"
+        <el-button
+          type="danger"
+          text
+          size="large"
+          @click="handleCloseUpdateDialog"
           >取消
         </el-button>
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleUpdateSchool(e, updateFormRef)"
           >送出
         </el-button>
@@ -168,7 +184,7 @@ const { getSchools, createSchool, updateSchool, deleteSchool } = schoolStore
 const search = ref('')
 const size = ref('default')
 
-const showCreateDialog = ref(false)
+const handleShowCreateDialog = ref(false)
 const showUpdateDialog = ref(false)
 const createDialogRef = ref()
 const updateDialogRef = ref()
@@ -254,7 +270,7 @@ const handleShowUpdateDialog = (row) => {
 }
 
 const handleCloseCreateDialog = () => {
-  showCreateDialog.value = false
+  handleShowCreateDialog.value = false
   createFormRef.value.resetFields()
   createFormRef.value.clearValidate()
 }
@@ -352,7 +368,7 @@ const handlePageChange = (p) => {
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
 
   .card-header {
     display: flex;

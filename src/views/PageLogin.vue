@@ -16,6 +16,7 @@
             <el-form-item label="帳號" prop="username">
               <el-input
                 v-model="loginData.username"
+                size="large"
                 @keyup.enter="(e) => handleSubmit(e, loginFormRef)"
                 placeholder="請輸入帳號"
               />
@@ -24,6 +25,7 @@
               <el-input
                 v-model="loginData.password"
                 type="password"
+                size="large"
                 autocomplete="off"
                 @keyup.enter="(e) => handleSubmit(e, loginFormRef)"
                 placeholder="請輸入密碼"
@@ -31,10 +33,12 @@
             </el-form-item>
             <el-form-item>
               <el-button
-                class="formButton"
+                class="login-button"
+                size="large"
                 @click="(e) => handleSubmit(e, loginFormRef)"
-                >登入</el-button
               >
+                登入
+              </el-button>
             </el-form-item>
           </el-form>
         </el-card>
@@ -97,8 +101,11 @@ const handleSubmit = async (e, formRef) => {
     h2 {
       text-align: center;
     }
-    .formButton {
-      margin: auto;
+
+    .login-button {
+      width: 100%;
+      max-width: 280px;
+      margin-left: auto;
     }
   }
 }

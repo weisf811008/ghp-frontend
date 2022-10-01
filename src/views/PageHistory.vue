@@ -5,7 +5,7 @@
         <h2>操作記錄</h2>
       </div>
     </template>
-    <el-input v-model="search" placeholder="Search" />
+    <el-input v-model="search" placeholder="Search" size="large" />
     <el-table :data="filterTableData" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
@@ -57,7 +57,7 @@ const search = ref('')
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
 
   .card-header {
     display: flex;

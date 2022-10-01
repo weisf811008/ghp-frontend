@@ -3,12 +3,16 @@
     <template #header>
       <div class="card-header">
         <h2>巡檢目錄</h2>
-        <el-button @click="() => (showCreateForm = true)" icon="Plus">
+        <el-button
+          size="large"
+          @click="() => (showCreateForm = true)"
+          icon="Plus"
+        >
           新增巡檢表單
         </el-button>
       </div>
     </template>
-    <el-input v-model="search" placeholder="Search" />
+    <el-input v-model="search" placeholder="Search" size="large" />
     <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
@@ -17,11 +21,12 @@
       </el-table-column>
       <el-table-column label="巡檢表單名稱" prop="title" width="200" />
       <el-table-column label="備註" prop="remarks" />
-      <el-table-column label="操作" align="center" width="200">
+      <el-table-column label="操作" align="center" width="220">
         <template #default="scope">
           <el-button
             type="primary"
             text
+            size="large"
             icon="EditPen"
             @click="handleShowUpdateForm(scope.row)"
           >
@@ -30,6 +35,7 @@
           <el-button
             type="danger"
             text
+            size="large"
             icon="Delete"
             @click="handleDeleteForm(scope.row)"
           >
@@ -86,9 +92,12 @@
         <el-input v-model="createData.remarks" />
       </el-form-item>
       <div style="flex: auto">
-        <el-button @click="handleCloseCreateDrawer">取消</el-button>
+        <el-button size="large" @click="handleCloseCreateDrawer"
+          >取消</el-button
+        >
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleCreateForm(e, createFormRef)"
           >送出
         </el-button>
@@ -135,9 +144,12 @@
         <el-input v-model="updateData.remarks" />
       </el-form-item>
       <div style="flex: auto">
-        <el-button @click="handleCloseUpdateDrawer">取消</el-button>
+        <el-button size="large" @click="handleCloseUpdateDrawer"
+          >取消</el-button
+        >
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleUpdateForm(e, updateFormRef)"
           >送出
         </el-button>
@@ -355,7 +367,7 @@ const handleDeleteForm = (row) => {
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
 
   .card-header {
     display: flex;

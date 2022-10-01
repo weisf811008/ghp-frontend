@@ -8,6 +8,7 @@
           <el-date-picker
             v-model="dates"
             type="daterange"
+            size="large"
             :disabled-date="disabledDate"
             unlink-panels
             range-separator="To"
@@ -16,7 +17,7 @@
             :shortcuts="shortcuts"
             @change="handleChange"
           />
-          <el-button type="primary" @click="handleDownload">
+          <el-button type="primary" size="large" @click="handleDownload">
             下載Excel
           </el-button>
         </div>
@@ -311,12 +312,13 @@ const handleDownload = () => {
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
 
   .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
 
     .block {
       display: flex;

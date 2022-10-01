@@ -3,12 +3,16 @@
     <template #header>
       <div class="card-header">
         <h2>學校帳號管理</h2>
-        <el-button @click="() => (showCreateDialog = true)" icon="Plus">
+        <el-button
+          size="large"
+          @click="() => (handleShowCreateDialog = true)"
+          icon="Plus"
+        >
           新增帳號
         </el-button>
       </div>
     </template>
-    <el-input v-model="search" placeholder="Search" />
+    <el-input v-model="search" placeholder="Search" size="large" />
     <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
@@ -29,11 +33,12 @@
       />
       <el-table-column label="電話" prop="phone" align="center" width="150" />
       <el-table-column label="Email" prop="email" align="center" />
-      <el-table-column label="操作" align="center" width="320">
+      <el-table-column label="操作" align="center" width="340">
         <template #default="scope">
           <el-button
             type="primary"
             text
+            size="large"
             icon="EditPen"
             @click="handleShowUpdateDialog(scope.row)"
           >
@@ -42,6 +47,7 @@
           <el-button
             type="primary"
             text
+            size="large"
             icon="Key"
             @click="() => handleChangeDialog(scope.row)"
           >
@@ -50,6 +56,7 @@
           <el-button
             type="danger"
             text
+            size="large"
             icon="Delete"
             @click="handleDeleteUser(scope.row)"
           >
@@ -68,7 +75,7 @@
   </el-card>
   <el-dialog
     ref="createDialogRef"
-    v-model="showCreateDialog"
+    v-model="handleShowCreateDialog"
     title="新增帳號"
     :before-close="handleCloseCreateDialog"
   >
@@ -83,6 +90,7 @@
       <el-form-item label="角色名稱" prop="role">
         <el-select
           class="formSelect"
+          size="large"
           v-model="createData.role"
           placeholder="選擇角色"
         >
@@ -113,11 +121,16 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="danger" text @click="handleCloseCreateDialog"
+        <el-button
+          type="danger"
+          text
+          size="large"
+          @click="handleCloseCreateDialog"
           >取消
         </el-button>
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleCreateUser(e, createFormRef)"
           >送出
         </el-button>
@@ -141,6 +154,7 @@
       <el-form-item label="角色名稱" prop="role">
         <el-select
           class="formSelect"
+          size="large"
           v-model="updateData.role"
           placeholder="選擇角色"
         >
@@ -160,11 +174,16 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="danger" text @click="handleCloseUpdateDialog"
+        <el-button
+          type="danger"
+          text
+          size="large"
+          @click="handleCloseUpdateDialog"
           >取消
         </el-button>
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleUpdateUser(e, updateFormRef)"
           >送出
         </el-button>
@@ -203,11 +222,16 @@
     </el-form>
     <template #footer>
       <span class="dialog-footer">
-        <el-button type="danger" text @click="handleCloseChangeDialog"
+        <el-button
+          type="danger"
+          text
+          size="large"
+          @click="handleCloseChangeDialog"
           >取消
         </el-button>
         <el-button
           type="primary"
+          size="large"
           @click="(e) => handleChangePassword(e, changeFormRef)"
           >送出
         </el-button>
@@ -226,7 +250,7 @@ const { users, isLoading } = storeToRefs(userStore)
 const { getUsers, createUser, updateUser, deleteUser, resetPassword } =
   userStore
 
-const showCreateDialog = ref(false)
+const handleShowCreateDialog = ref(false)
 const showUpdateDialog = ref(false)
 const showChangeDialog = ref(false)
 
@@ -344,7 +368,7 @@ const handleChangeDialog = (row) => {
 }
 
 const handleCloseCreateDialog = () => {
-  showCreateDialog.value = false
+  handleShowCreateDialog.value = false
   createFormRef.value.resetFields()
   createFormRef.value.clearValidate()
 }
@@ -474,7 +498,7 @@ const handleDeleteUser = (row) => {
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
 
   .card-header {
     display: flex;
