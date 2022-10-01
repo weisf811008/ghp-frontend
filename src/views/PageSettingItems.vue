@@ -250,6 +250,9 @@
       status-icon
       hide-required-asterisk
     >
+      <el-form-item label="編號" prop="no">
+        {{ updateData.no }}
+      </el-form-item>
       <el-form-item label="檢核大項" prop="categoryId">
         <el-select
           class="formSelect"
@@ -264,9 +267,6 @@
             :key="`select-category-${category.id}`"
           />
         </el-select>
-      </el-form-item>
-      <el-form-item label="編號" prop="no">
-        <el-input v-model="updateData.no" placeholder="請輸入編號" />
       </el-form-item>
       <el-form-item label="檢核細項" prop="item">
         <el-input
@@ -618,26 +618,9 @@ const handlePageChange = (p) => {
 </script>
 
 <style lang="scss" scoped>
-.box-card {
-  min-width: 350px;
-
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    h2 {
-      margin: 0;
-    }
-  }
-
-  .pages {
-    justify-content: flex-end;
-  }
-  .dialog-footer {
-    button:first-child {
-      margin-right: 10px;
-    }
+.dialog-footer {
+  button:first-child {
+    margin-right: 10px;
   }
 }
 

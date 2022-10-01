@@ -49,12 +49,12 @@
         <template #default="scope">
           <span
             :class="{
-              pass: getStatus(reports[scope.row.id], i) === 'pass',
-              fail: getStatus(reports[scope.row.id], i) === 'fail',
-              others: getStatus(reports[scope.row.id], i) === 'others',
+              pass: getStatus(scope.row, i) === 'pass',
+              fail: getStatus(scope.row, i) === 'fail',
+              others: getStatus(scope.row, i) === 'others',
             }"
           >
-            {{ getStatusLabel(reports[scope.row.id], i) }}
+            {{ getStatusLabel(scope.row, i) }}
           </span>
         </template>
       </el-table-column>
@@ -63,7 +63,7 @@
       class="pages"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="reportItems.length"
+      :total="reports.length"
       @current-change="handlePageChange"
     />
   </el-card>
@@ -79,23 +79,17 @@ import {
   differenceInDays,
 } from 'date-fns'
 import * as XLSX from 'xlsx'
-import { useItemStore } from '../stores/items'
 import { useReportDailyStore } from '../stores/reportsDaily'
 
 const reportDailyStore = useReportDailyStore()
 const { isLoading } = storeToRefs(reportDailyStore)
 const { getReportDaily } = reportDailyStore
 
-const itemStore = useItemStore()
-const { items } = storeToRefs(itemStore)
-const { getItems } = itemStore
-
 onMounted(() => {
-  getItems()
   getReports()
 })
 
-const reports = ref({})
+const reports = ref([])
 
 //date picker
 const today = startOfDay(new Date())
@@ -136,14 +130,12 @@ const getPeriodInDays = computed(
   () => differenceInDays(new Date(dates.value[1]), new Date(dates.value[0])) + 1
 )
 
-const getReportItems = () => items.value.filter((item) => item.needDaily)
-const reportItems = computed(getReportItems)
-
 const getReports = async () => {
   reports.value = await getReportDaily(
     dates.value[0].toISOString(),
     dates.value[1].toISOString()
   )
+  reports.value.sort((a, b) => (a.no > b.no ? 1 : -1))
 }
 
 const statusMap = {
@@ -206,18 +198,15 @@ const handleDownload = () => {
       ...dateArr.map((d) => format(d, 'MM/dd')),
       '備註',
     ],
-    ...getReportItems().map((it, i) => {
+    ...reports.value.map(({ category, item, ...rest }, i) => {
       return [
         i + 1,
-        it.category,
-        it.item,
+        category,
+        item,
         '',
         ...dateArr.map((d) => {
           const dateStr = format(d, f)
-          if (!reports.value[it.id] || !reports.value[it.id][dateStr]) {
-            return ''
-          }
-          return statusMap[reports.value[it.id][dateStr]]
+          return statusMap[rest[dateStr]] || ''
         }),
       ]
     }),
@@ -237,22 +226,24 @@ const handleDownload = () => {
     // header rows
     { s: { c: 2, r: 3 }, e: { c: 3, r: 3 } },
     // data rows
-    ...getReportItems().map((v, i) => ({
-      s: { c: 2, r: 4 + i },
-      e: { c: 3, r: 4 + i },
-    })),
+    ...Array(reports.value.length)
+      .fill()
+      .map((v, i) => ({
+        s: { c: 2, r: 4 + i },
+        e: { c: 3, r: 4 + i },
+      })),
     //footer row
     {
-      s: { c: 0, r: 4 + getReportItems().length },
-      e: { c: 2, r: 4 + getReportItems().length },
+      s: { c: 0, r: 4 + reports.value.length },
+      e: { c: 2, r: 4 + reports.value.length },
     },
     {
-      s: { c: 3, r: 4 + getReportItems().length },
-      e: { c: 6, r: 4 + getReportItems().length },
+      s: { c: 3, r: 4 + reports.value.length },
+      e: { c: 6, r: 4 + reports.value.length },
     },
     {
-      s: { c: 7, r: 4 + getReportItems().length },
-      e: { c: 10, r: 4 + getReportItems().length },
+      s: { c: 7, r: 4 + reports.value.length },
+      e: { c: 10, r: 4 + reports.value.length },
     },
   ]
   ws['!cols'] = [
@@ -284,7 +275,7 @@ const handlePageChange = (p) => {
 }
 
 const getTableData = computed(() =>
-  getReportItems().slice(
+  reports.value.slice(
     (page.value - 1) * pageSize.value,
     page.value * pageSize.value
   )
@@ -292,61 +283,29 @@ const getTableData = computed(() =>
 </script>
 
 <style lang="scss" scoped>
-.box-card {
-  min-width: 350px;
-  overflow-x: hidden;
+.block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgb(96, 98, 102);
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-
-    .block {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: rgb(96, 98, 102);
-
-      .selectDate {
-        margin-right: 10px;
-        font-size: 14px;
-      }
-    }
-
-    h2 {
-      margin: 0;
-    }
-
-    .el-button {
-      margin-left: 20px;
-    }
-  }
-
-  .pass {
-    color: #67c23a;
-  }
-
-  .fail {
-    color: #f56c6c;
-  }
-
-  .others {
-    color: #e6a23c;
-  }
-
-  .formReport {
-    margin-top: 20px;
+  .selectDate {
+    margin-right: 10px;
     font-size: 14px;
-    color: rgb(96, 98, 102);
-
-    span {
-      margin-right: 10px;
-    }
   }
+}
 
-  .pages {
-    justify-content: flex-end;
+.el-button {
+  margin-left: 20px;
+}
+
+.formReport {
+  margin-top: 20px;
+  font-size: 14px;
+  color: rgb(96, 98, 102);
+
+  span {
+    margin-right: 10px;
   }
 }
 </style>

@@ -161,7 +161,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { subDays, startOfDay, format, parseISO } from 'date-fns'
+import { subDays, startOfDay, format, parseISO, isAfter } from 'date-fns'
 import * as XLSX from 'xlsx'
 import { useReportTablewareStore } from '../stores/reportsTableware'
 
@@ -324,7 +324,9 @@ const handleDownload = () => {
       .concat(
         abnormalRows.value
           .slice(0)
-          .reverse()
+          .sort((a, b) =>
+            isAfter(new Date(a.date), new Date(b.date)) ? 1 : -1
+          )
           .map((row, i) => [i + 1, row.date, row.item, row.remarks])
       )
       .concat([
@@ -389,47 +391,20 @@ const handleDownload = () => {
 </script>
 
 <style lang="scss" scoped>
-.box-card {
-  min-width: 350px;
+.block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgb(96, 98, 102);
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-
-    .block {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: rgb(96, 98, 102);
-
-      .selectDate {
-        margin-right: 10px;
-        font-size: 14px;
-      }
-    }
-
-    h2 {
-      margin: 0;
-    }
-
-    .el-button {
-      margin-left: 20px;
-    }
-  }
-
-  .pages {
-    justify-content: flex-end;
+  .selectDate {
+    margin-right: 10px;
+    font-size: 14px;
   }
 }
 
-.pass {
-  color: #67c23a;
-}
-
-.fail {
-  color: #f56c6c;
+.el-button {
+  margin-left: 20px;
 }
 
 :deep(.el-descriptions__cell) {

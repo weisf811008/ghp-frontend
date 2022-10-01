@@ -63,7 +63,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { subDays, startOfDay, format } from 'date-fns'
+import { subDays, startOfDay, format, isAfter } from 'date-fns'
 import * as XLSX from 'xlsx'
 import { useReportProdtempStore } from '../stores/reportsProdtemp'
 import parseISO from 'date-fns/esm/fp/parseISO/index.js'
@@ -184,7 +184,9 @@ const handleDownload = () => {
       .concat(
         abnormalRows.value
           .slice(0)
-          .reverse()
+          .sort((a, b) =>
+            isAfter(new Date(a.date), new Date(b.date)) ? 1 : -1
+          )
           .map((row, i) => [i + 1, row.date, row.item, row.remarks])
       )
       .concat([['衛生管理人員', '', '', '營養師', '', '單位主管', '']])
@@ -250,47 +252,20 @@ const getTableData = computed(() =>
 </script>
 
 <style lang="scss" scoped>
-.box-card {
-  min-width: 350px;
+.block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgb(96, 98, 102);
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-
-    .block {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: rgb(96, 98, 102);
-
-      .selectDate {
-        margin-right: 10px;
-        font-size: 14px;
-      }
-    }
-
-    h2 {
-      margin: 0;
-    }
-
-    .el-button {
-      margin-left: 20px;
-    }
+  .selectDate {
+    margin-right: 10px;
+    font-size: 14px;
   }
+}
 
-  .pass {
-    color: #67c23a;
-  }
-
-  .fail {
-    color: #f56c6c;
-  }
-
-  .pages {
-    justify-content: flex-end;
-  }
+.el-button {
+  margin-left: 20px;
 }
 
 :deep(.el-descriptions__cell) {

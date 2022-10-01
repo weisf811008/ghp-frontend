@@ -56,9 +56,7 @@
         width="100"
       >
         <template #default="scope">
-          {{
-            reports[scope.row.code] ? reports[scope.row.code].pass.length : 0
-          }}
+          {{ scope.row.pass.length }}
         </template>
       </el-table-column>
       <el-table-column
@@ -68,9 +66,7 @@
         width="100"
       >
         <template #default="scope">
-          {{
-            reports[scope.row.code] ? reports[scope.row.code].fail.length : 0
-          }}
+          {{ scope.row.fail.length }}
         </template>
       </el-table-column>
       <el-table-column
@@ -80,9 +76,7 @@
         width="100"
       >
         <template #default="scope">
-          {{
-            reports[scope.row.code] ? reports[scope.row.code].others.length : 0
-          }}
+          {{ scope.row.others.length }}
         </template>
       </el-table-column>
       <el-table-column
@@ -94,27 +88,13 @@
         <template #default="scope">
           <el-descriptions>
             <el-descriptions-item label="合格項目：">
-              {{
-                reports[scope.row.code]
-                  ? reports[scope.row.code].pass.map(getStatusDetail).join(', ')
-                  : ''
-              }}
+              {{ scope.row.pass.map(getStatusDetail).join(', ') }}
             </el-descriptions-item>
             <el-descriptions-item label="不合格項目：">
-              {{
-                reports[scope.row.code]
-                  ? reports[scope.row.code].fail.map(getStatusDetail).join(', ')
-                  : ''
-              }}
+              {{ scope.row.fail.map(getStatusDetail).join(', ') }}
             </el-descriptions-item>
             <el-descriptions-item label="其他項目：">
-              {{
-                reports[scope.row.code]
-                  ? reports[scope.row.code].others
-                      .map(getStatusDetail)
-                      .join(', ')
-                  : ''
-              }}
+              {{ scope.row.others.map(getStatusDetail).join(', ') }}
             </el-descriptions-item>
           </el-descriptions>
         </template>
@@ -124,35 +104,31 @@
       class="pages"
       layout="prev, pager, next"
       :page-size="pageSize"
-      :total="visitingForms.length"
+      :total="reports.length"
       @current-change="handlePageChange"
     />
   </el-card>
 </template>
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { subDays, startOfDay, format } from 'date-fns'
 import * as XLSX from 'xlsx'
-import { useVisitingFormStore } from '../stores/visitingForms'
 import { useReportVisitingStore } from '../stores/reportsVisiting'
-
-const visitingFormStore = useVisitingFormStore()
-const { visitingForms } = storeToRefs(visitingFormStore)
-const { getVisitingForms } = visitingFormStore
 
 const reportVisitingStore = useReportVisitingStore()
 const { isLoading } = storeToRefs(reportVisitingStore)
 const { getReportVisiting } = reportVisitingStore
 
 onMounted(() => {
-  getVisitingForms()
   getReports()
 })
 
 //date picker
 const today = startOfDay(new Date())
 const dates = ref([subDays(today, 6), today])
+const formatDate = 'yyyyMMdd'
+
 const shortcuts = [
   {
     text: '上週',
@@ -185,7 +161,7 @@ const shortcuts = [
 
 const disabledDate = (time) => time.getTime() > Date.now()
 
-const reports = ref({})
+const reports = ref([])
 
 const getReports = async () => {
   const [start, end] = dates.value
@@ -193,6 +169,7 @@ const getReports = async () => {
     start.toISOString(),
     end.toISOString()
   )
+  reports.value.sort((a, b) => (a.code > b.code ? 1 : -1))
 }
 
 const handleChange = () => {
@@ -208,7 +185,7 @@ const handlePageChange = (p) => {
 }
 
 const getTableData = computed(() =>
-  visitingForms.value.slice(
+  reports.value.slice(
     (page.value - 1) * pageSize.value,
     page.value * pageSize.value
   )
@@ -218,28 +195,17 @@ const getStatusDetail = ({ date, itemNo, remarks }) =>
   `${date}(${itemNo}${remarks ? ` ${remarks}` : ''})`
 
 const handleDownload = () => {
-  const rows = visitingForms.value.map((visit, i) => ({
+  const rows = reports.value.map((visit, i) => ({
     類別: visit.class,
     編號: visit.code,
     訪視項目: visit.description,
-    合格次數: reports.value[visit.code]
-      ? reports.value[visit.code].pass.length
-      : 0,
-    不合格次數: reports.value[visit.code]
-      ? reports.value[visit.code].fail.length
-      : 0,
-    其他次數: reports.value[visit.code]
-      ? reports.value[visit.code].others.length
-      : 0,
-    不合格日期及狀況: reports.value[visit.code]
-      ? reports.value[visit.code].fail.map(getStatusDetail).join(', ')
-      : '',
-    合格日期: reports.value[visit.code]
-      ? reports.value[visit.code].pass.map(({ date }) => date).join(', ')
-      : '',
+    合格次數: visit.pass.length,
+    不合格次數: visit.fail.length,
+    其他次數: visit.others.length,
+    不合格日期及狀況: visit.fail.map(getStatusDetail).join(', '),
+    合格日期: visit.pass.map(({ date }) => date).join(', '),
   }))
 
-  const formatDate = 'yyyyMMdd'
   const sheetDate =
     format(dates.value[0], formatDate) +
     '~' +
@@ -284,12 +250,12 @@ const handleDownload = () => {
     { s: { c: 0, r: 2 }, e: { c: 5, r: 2 } },
     //footer row
     {
-      s: { c: 0, r: 4 + visitingForms.value.length },
-      e: { c: 1, r: 4 + visitingForms.value.length },
+      s: { c: 0, r: 4 + reports.value.length },
+      e: { c: 1, r: 4 + reports.value.length },
     },
     {
-      s: { c: 3, r: 4 + visitingForms.value.length },
-      e: { c: 5, r: 4 + visitingForms.value.length },
+      s: { c: 3, r: 4 + reports.value.length },
+      e: { c: 5, r: 4 + reports.value.length },
     },
   ]
   ws['!cols'] = [
@@ -311,39 +277,20 @@ const handleDownload = () => {
 </script>
 
 <style lang="scss" scoped>
-.box-card {
-  min-width: 350px;
+.block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgb(96, 98, 102);
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-
-    .block {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: rgb(96, 98, 102);
-
-      .selectDate {
-        margin-right: 10px;
-        font-size: 14px;
-      }
-    }
-
-    h2 {
-      margin: 0;
-    }
-
-    .el-button {
-      margin-left: 20px;
-    }
+  .selectDate {
+    margin-right: 10px;
+    font-size: 14px;
   }
+}
 
-  .pages {
-    justify-content: flex-end;
-  }
+.el-button {
+  margin-left: 20px;
 }
 
 :deep(.el-descriptions__cell) {
