@@ -42,7 +42,7 @@
         <span>報表管理</span>
       </template>
       <el-menu-item-group>
-        <el-menu-item index="/reports/daily">日報表</el-menu-item>
+        <el-menu-item index="/reports/daily">每日衛生管理日誌</el-menu-item>
         <el-menu-item index="/reports/prodtemp">成品中心溫度報表</el-menu-item>
         <el-menu-item index="/reports/tnh">
           庫房、食材、檢體保存溫濕度報表
@@ -101,12 +101,14 @@
   </el-menu>
 </template>
 <script setup>
+import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useAuthStore } from '../../stores/auth'
-import { useMenuStore } from '../../stores/menu'
+import { useAuthStore } from '../stores/auth'
+import { useMenuStore } from '../stores/menu'
 
 const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
+
 const menuStore = useMenuStore()
 const { currentIndex, isCollapse } = storeToRefs(menuStore)
 const { setCurrentIndex, setIsCollapse } = menuStore
@@ -114,11 +116,16 @@ const { setCurrentIndex, setIsCollapse } = menuStore
 const isValid = (role) => {
   return user.value?.roles ? user.value.roles[0].role === role : false
 }
+
+window.onresize = () => {
+  setIsCollapse(document.body.offsetWidth < 975)
+}
 </script>
 
 <style lang="scss" scoped>
 .menu {
   border-right: 1px solid #e5eaf3;
+  min-width: 63px;
 
   .arrow {
     position: absolute;

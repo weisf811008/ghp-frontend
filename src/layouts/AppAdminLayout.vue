@@ -1,6 +1,7 @@
 <template>
   <el-container class="layout-container">
-    <AppMenu />
+    <AppMenu class="hidden-sm-and-down" />
+    <AppMenu class="hidden-md-and-up" v-if="showMenu" />
     <el-container>
       <el-header>
         <AppCurrentUser />
@@ -13,8 +14,13 @@
 </template>
 
 <script setup>
-import AppMenu from '../components/layoutComponents/AppMenu.vue'
-import AppCurrentUser from '../components/layoutComponents/AppCurrentUser.vue'
+import { storeToRefs } from 'pinia'
+import { useMenuStore } from '../stores/menu'
+import AppMenu from '../components/AppMenu.vue'
+import AppCurrentUser from '../components/AppCurrentUser.vue'
+
+const menuStore = useMenuStore()
+const { showMenu } = storeToRefs(menuStore)
 </script>
 <style lang="scss" scoped>
 body {

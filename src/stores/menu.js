@@ -6,6 +6,7 @@ const resource = 'menu'
 export const useMenuStore = defineStore(resource, () => {
   const currentIndex = ref(null)
   const isCollapse = ref(false)
+  const showMenu = ref(false)
 
   const setCurrentIndex = (index) => {
     currentIndex.value = index
@@ -18,6 +19,7 @@ export const useMenuStore = defineStore(resource, () => {
   return {
     currentIndex,
     isCollapse,
+    showMenu,
     setCurrentIndex,
     setIsCollapse,
   }
