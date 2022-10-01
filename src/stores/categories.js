@@ -16,6 +16,14 @@ export const useCategoryStore = defineStore(resource, () => {
     isLoading.value = false
   }
 
+  // 取得一筆大項
+  const getCategoryById = async (id) => {
+    isLoading.value = true
+    const res = await request.get(`${resource}/${id}`)
+    isLoading.value = false
+    return res.data
+  }
+
   //新增一筆大項
   const createCategory = async (data) => {
     isLoading.value = true
@@ -44,6 +52,7 @@ export const useCategoryStore = defineStore(resource, () => {
     categories,
     isLoading,
     getCategories,
+    getCategoryById,
     createCategory,
     updateCategory,
     deleteCategory,
