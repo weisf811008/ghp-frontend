@@ -8,6 +8,7 @@
           <el-date-picker
             v-model="dates"
             type="daterange"
+            size="large"
             :disabled-date="disabledDate"
             unlink-panels
             range-separator="To"
@@ -16,7 +17,7 @@
             :shortcuts="shortcuts"
             @change="getReports"
           />
-          <el-button type="primary" @click="handleDownload">
+          <el-button type="primary" size="large" @click="handleDownload">
             下載Excel
           </el-button>
         </div>
@@ -250,6 +251,9 @@ const handleDownload = () => {
     '~' +
     format(dates.value[1], formatDate)
 
+  const reportsLength = reports.value.length
+  const reportsAndAbnormalLength = reportsLength + abnormalRows.value.length
+
   const ws = XLSX.utils.aoa_to_sheet(
     [
       [
@@ -295,19 +299,22 @@ const handleDownload = () => {
       ],
     ]
       .concat(
-        reports.value.map((row, i) => [
-          i + 1,
-          format(parseISO(row.date), 'yyyy-MM-dd'),
-          getDisplayText(row.diningBucketLook),
-          getDisplayText(row.diningBucketStarch),
-          getDisplayText(row.diningBucketFat),
-          getDisplayText(row.soupBucketLook),
-          getDisplayText(row.soupBucketStarch),
-          getDisplayText(row.soupBucketFat),
-          getDisplayText(row.tablewareLook),
-          getDisplayText(row.tablewareStarch),
-          getDisplayText(row.tablewareStarch),
-        ])
+        reports.value
+          .slice(0)
+          .reverse()
+          .map((row, i) => [
+            i + 1,
+            format(parseISO(row.date), 'yyyy-MM-dd'),
+            getDisplayText(row.diningBucketLook),
+            getDisplayText(row.diningBucketStarch),
+            getDisplayText(row.diningBucketFat),
+            getDisplayText(row.soupBucketLook),
+            getDisplayText(row.soupBucketStarch),
+            getDisplayText(row.soupBucketFat),
+            getDisplayText(row.tablewareLook),
+            getDisplayText(row.tablewareStarch),
+            getDisplayText(row.tablewareStarch),
+          ])
       )
       .concat([[]])
       .concat([[]])
@@ -315,12 +322,10 @@ const handleDownload = () => {
         ['項次', '日期', '異常項目', '異常說明', '', '', '', '', '', '', ''],
       ])
       .concat(
-        abnormalRows.value.map((row, i) => [
-          i + 1,
-          row.date,
-          row.item,
-          row.remarks,
-        ])
+        abnormalRows.value
+          .slice(0)
+          .reverse()
+          .map((row, i) => [i + 1, row.date, row.item, row.remarks])
       )
       .concat([
         ['衛生管理人員', '', '', '', '營養師', '', '', '', '單位主管', '', ''],
@@ -341,25 +346,25 @@ const handleDownload = () => {
     { s: { c: 8, r: 3 }, e: { c: 10, r: 3 } },
     //abnormal row
     {
-      s: { c: 3, r: 7 + reports.value.length },
-      e: { c: 10, r: 7 + reports.value.length },
+      s: { c: 3, r: 7 + reportsLength },
+      e: { c: 10, r: 7 + reportsLength },
     },
     ...abnormalRows.value.map((v, i) => ({
-      s: { c: 3, r: 7 + reports.value.length + i + 1 },
-      e: { c: 10, r: 7 + reports.value.length + i + 1 },
+      s: { c: 3, r: 7 + reportsLength + i + 1 },
+      e: { c: 10, r: 7 + reportsLength + i + 1 },
     })),
     //footer
     {
-      s: { c: 0, r: 8 + reports.value.length + abnormalRows.value.length },
-      e: { c: 3, r: 8 + reports.value.length + abnormalRows.value.length },
+      s: { c: 0, r: 8 + reportsAndAbnormalLength },
+      e: { c: 3, r: 8 + reportsAndAbnormalLength },
     },
     {
-      s: { c: 4, r: 8 + reports.value.length + abnormalRows.value.length },
-      e: { c: 7, r: 8 + reports.value.length + abnormalRows.value.length },
+      s: { c: 4, r: 8 + reportsAndAbnormalLength },
+      e: { c: 7, r: 8 + reportsAndAbnormalLength },
     },
     {
-      s: { c: 8, r: 8 + reports.value.length + abnormalRows.value.length },
-      e: { c: 10, r: 8 + reports.value.length + abnormalRows.value.length },
+      s: { c: 8, r: 8 + reportsAndAbnormalLength },
+      e: { c: 10, r: 8 + reportsAndAbnormalLength },
     },
   ]
   ws['!cols'] = [
@@ -385,12 +390,13 @@ const handleDownload = () => {
 
 <style lang="scss" scoped>
 .box-card {
-  min-width: 480px;
+  min-width: 350px;
 
   .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
 
     .block {
       display: flex;
