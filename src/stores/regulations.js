@@ -21,20 +21,20 @@ export const useRegulationStore = defineStore(resource, () => {
     isLoading.value = false
   }
 
+  //取得一筆條文
+  const getRegulationById = async (id) => {
+    isLoading.value = true
+    const res = await request.get(`${resource}/${id}`)
+    isLoading.value = false
+    return res.data
+  }
+
   //新增一筆條文
   const createRegulation = async (data) => {
     isLoading.value = true
     await request.post(resource, data)
     isLoading.value = false
     await getRegulations()
-  }
-
-  //取得一筆條文
-  const getRegulation = async (id) => {
-    isLoading.value = true
-    const res = await request.get(`${resource}/${id}`)
-    isLoading.value = false
-    return res.data
   }
 
   //修改一筆條文
@@ -57,8 +57,8 @@ export const useRegulationStore = defineStore(resource, () => {
     regulations,
     isLoading,
     getRegulations,
+    getRegulationById,
     createRegulation,
-    getRegulation,
     updateRegulation,
     deleteRegulation,
   }
