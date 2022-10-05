@@ -17,7 +17,11 @@
             :shortcuts="shortcuts"
             @change="handleChange"
           />
-          <el-button type="primary" size="large" @click="handleDownload">
+          <el-button
+            type="primary"
+            size="large"
+            @click.prevent="handleDownload"
+          >
             下載Excel
           </el-button>
         </div>
@@ -174,7 +178,7 @@ const handleChange = () => {
 }
 
 // pagination
-const pageSize = ref(10)
+const pageSize = ref(20)
 const page = ref(1)
 
 const handlePageChange = (p) => {
