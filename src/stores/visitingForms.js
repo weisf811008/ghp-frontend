@@ -29,6 +29,14 @@ export const useVisitingFormStore = defineStore(resource, () => {
     await getVisitingForms()
   }
 
+  //取得一筆訪視表
+  const getVisitingFormById = async (id) => {
+    isLoading.value = true
+    const res = await request.get(`${resource}/${id}`)
+    isLoading.value = false
+    return res.data
+  }
+
   //修改一筆訪視表
   const updateVisingForm = async (id, data) => {
     isLoading.value = true
@@ -50,6 +58,7 @@ export const useVisitingFormStore = defineStore(resource, () => {
     isLoading,
     getVisitingForms,
     createVisitingForm,
+    getVisitingFormById,
     updateVisingForm,
     deleteVisitingForms,
   }
