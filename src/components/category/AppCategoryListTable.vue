@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-input v-model="search" placeholder="Search" size="large" />
-    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
+    <el-table :data="tableData" v-loading="isLoading" table-layout="auto">
       <el-table-column label="項次" fixed align="center" width="60">
         <template #default="scope">
           {{ scope.$index + (page - 1) * pageSize + 1 }}
@@ -31,27 +31,27 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
-      class="pages"
-      layout="prev, pager, next"
-      :page-size="pageSize"
-      :total="getFilteredData.length"
-      @current-change="handlePageChange"
+    <AppPagination
+      v-model:page="page"
+      v-model:pageSize="pageSize"
+      :data="filterData"
+      @pageChange="handlePageChange"
     />
-    <!-- <AppPagination :filterData="filterData" @update="getTableData" /> -->
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-// import AppPagination from '../AppPagination.vue'
 
 const props = defineProps({
   categories: {
     type: Array,
     required: true,
   },
-  isLoading: Boolean,
+  isLoading: {
+    type: Boolean,
+    default: false,
+  },
   update: {
     type: Function,
     required: true,
@@ -66,23 +66,19 @@ const emit = defineEmits(['update'])
 
 //search
 const search = ref('')
-const filterData = () =>
+const filterData = computed(() =>
   props.categories.filter(
     (data) => !search.value || data.category.includes(search.value)
   )
+)
 
 // pagination
 const page = ref(1)
-const pageSize = ref(10)
-const getFilteredData = computed(() => filterData())
-const getTableData = computed(() =>
-  filterData().slice(
-    (page.value - 1) * pageSize.value,
-    page.value * pageSize.value
-  )
-)
-const handlePageChange = (p) => {
-  page.value = p
+const pageSize = ref(20)
+const tableData = ref([])
+
+const handlePageChange = (data) => {
+  tableData.value = data
 }
 
 const showUpdateDialog = (id) => {
@@ -118,8 +114,4 @@ const showDeleteConfirm = (row) => {
     })
 }
 </script>
-<style lang="scss" scoped>
-.pages {
-  justify-content: flex-end;
-}
-</style>
+<style lang="scss" scoped></style>

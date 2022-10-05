@@ -7,6 +7,7 @@
         :rules="rules"
         :disabled="isLoading"
         size="large"
+        label-width="auto"
         status-icon
         hide-required-asterisk
       >
@@ -41,9 +42,18 @@
 import { ref, computed } from 'vue'
 
 const props = defineProps({
-  show: Boolean,
-  data: Object,
-  isLoading: Boolean,
+  show: {
+    type: Boolean,
+    default: false,
+  },
+  data: {
+    type: Object,
+    default: () => ({}),
+  },
+  isLoading: {
+    type: Boolean,
+    default: false,
+  },
   rules: {
     type: Object,
     required: true,
@@ -68,7 +78,7 @@ const newData = ref({
 
 const handleOpenDialog = () => {
   newData.value = {
-    category: props.data?.category,
+    category: props.data.category,
   }
   formRef.value.resetFields()
   formRef.value.clearValidate()
@@ -83,11 +93,11 @@ const updateCategory = async (form) => {
     if (valid && props.data) {
       try {
         await props.update(props.data.id, newData.value)
+        closeDialog()
         ElNotification({
           type: 'success',
           message: '修改成功',
         })
-        closeDialog()
       } catch (e) {
         console.error(e)
         ElNotification({
@@ -99,5 +109,4 @@ const updateCategory = async (form) => {
   })
 }
 </script>
-
 <style lang="scss" scoped></style>

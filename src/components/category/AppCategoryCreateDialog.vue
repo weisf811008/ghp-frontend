@@ -4,8 +4,10 @@
       <el-form
         ref="formRef"
         :model="newData"
+        :disabled="isLoading"
         :rules="rules"
         size="large"
+        label-width="auto"
         status-icon
         hide-required-asterisk
       >
@@ -37,10 +39,17 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { ElNotification } from 'element-plus'
 
 const props = defineProps({
-  show: Boolean,
-  isLoading: Boolean,
+  show: {
+    type: Boolean,
+    default: false,
+  },
+  isLoading: {
+    type: Boolean,
+    default: false,
+  },
   rules: {
     type: Object,
     required: true,
@@ -94,8 +103,4 @@ const createCategory = (form) => {
 }
 </script>
 
-<style lang="scss" scoped>
-.cancel-button {
-  margin-right: 10px;
-}
-</style>
+<style lang="scss" scoped></style>

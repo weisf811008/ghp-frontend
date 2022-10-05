@@ -34,9 +34,9 @@
 import { ref, reactive } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useCategoryStore } from '../stores/categories'
-import AppListTable from '../components/category/AppListTable.vue'
-import AppCreateDialog from '../components/category/AppCreateDialog.vue'
-import AppUpdateDialog from '../components/category/AppUpdateDialog.vue'
+import AppListTable from '../components/category/AppCategoryListTable.vue'
+import AppCreateDialog from '../components/category/AppCategoryCreateDialog.vue'
+import AppUpdateDialog from '../components/category/AppCategoryUpdateDialog.vue'
 
 const categoryStore = useCategoryStore()
 const { categories, isLoading } = storeToRefs(categoryStore)
@@ -51,19 +51,22 @@ const {
 const category = ref({})
 const isShowCreaetDialog = ref(false)
 const isShowUpdateDialog = ref(false)
+
+const showCreateDialog = () => {
+  isShowCreaetDialog.value = true
+}
+
+const showUpdateDialog = async (id) => {
+  category.value = await getCategoryById(id)
+  isShowUpdateDialog.value = true
+}
+
 const rules = reactive({
   category: [
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
     { max: 255, message: '長度在255個字元內' },
   ],
 })
-
-const showCreateDialog = () => (isShowCreaetDialog.value = true)
-
-const showUpdateDialog = async (id) => {
-  category.value = await getCategoryById(id)
-  isShowUpdateDialog.value = true
-}
 
 getCategories()
 </script>
