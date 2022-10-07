@@ -3,306 +3,77 @@
     <template #header>
       <div class="card-header">
         <h2>學校帳號管理</h2>
-        <el-button
-          size="large"
-          @click="() => (handleShowCreateDialog = true)"
-          icon="Plus"
-        >
+        <el-button size="large" @click.prevent="showCreateDialog" icon="Plus">
           新增帳號
         </el-button>
       </div>
     </template>
-    <el-input v-model="search" placeholder="Search" size="large" />
-    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
-      <el-table-column label="項次" fixed align="center" width="60">
-        <template #default="scope">
-          {{ scope.$index + (page - 1) * pageSize + 1 }}
-        </template>
-      </el-table-column>
-      <el-table-column label="角色名稱" prop="roles" align="center" width="100">
-        <template #default="scope">
-          {{ scope.row.roles.map((r) => r.role).join(', ') }}
-        </template>
-      </el-table-column>
-      <el-table-column label="使用者" prop="name" align="center" width="100" />
-      <el-table-column
-        label="帳號"
-        prop="username"
-        align="center"
-        width="100"
-      />
-      <el-table-column label="電話" prop="phone" align="center" width="150" />
-      <el-table-column label="Email" prop="email" align="center" />
-      <el-table-column label="操作" align="center" width="340">
-        <template #default="scope">
-          <el-button
-            type="primary"
-            text
-            size="large"
-            icon="EditPen"
-            @click="handleShowUpdateDialog(scope.row)"
-          >
-            編輯
-          </el-button>
-          <el-button
-            type="primary"
-            text
-            size="large"
-            icon="Key"
-            @click="() => handleChangeDialog(scope.row)"
-          >
-            重設密碼
-          </el-button>
-          <el-button
-            type="danger"
-            text
-            size="large"
-            icon="Delete"
-            @click="handleDeleteUser(scope.row)"
-          >
-            刪除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-pagination
-      class="pages"
-      layout="prev, pager, next"
-      :page-size="pageSize"
-      :total="getFilteredData.length"
-      @current-change="handlePageChange"
+    <AppUserListTableDialog
+      :users="users"
+      :isLoading="isLoading"
+      :delete="deleteUser"
+      @update="showUpdateDialog"
+      @reset="showChangeDialog"
+    />
+    <AppUserCreateDialog
+      v-model:show="isShowCreateDialog"
+      :isLoading="isLoading"
+      :rules="rules"
+      :create="createUser"
+    />
+    <AppUserUpdateDialog
+      v-model:show="isShowUpdateDialog"
+      :data="user"
+      :isLoading="isLoading"
+      :rules="rules"
+      :update="updateUser"
+    />
+    <AppUserChangeDialog
+      v-model:show="isShowChangeDialog"
+      :data="user"
+      :isLoading="isLoading"
+      :reset="resetPassword"
     />
   </el-card>
-  <el-dialog
-    ref="createDialogRef"
-    v-model="handleShowCreateDialog"
-    title="新增帳號"
-    :before-close="handleCloseCreateDialog"
-  >
-    <el-form
-      ref="createFormRef"
-      :model="createData"
-      :rules="rules"
-      label-width="auto"
-      status-icon
-      hide-required-asterisk
-    >
-      <el-form-item label="角色名稱" prop="role">
-        <el-select
-          class="formSelect"
-          size="large"
-          v-model="createData.role"
-          placeholder="選擇角色"
-        >
-          <el-option value="學校管理員" />
-          <el-option value="巡檢人員" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="使用者" prop="name">
-        <el-input v-model="createData.name" placeholder="請輸入使用者" />
-      </el-form-item>
-      <el-form-item label="帳號" prop="username">
-        <el-input v-model="createData.username" placeholder="請輸入帳號" />
-      </el-form-item>
-      <el-form-item label="密碼" prop="password">
-        <el-input
-          v-model="createData.password"
-          type="password"
-          autocomplete="off"
-          placeholder="請輸入密碼"
-        />
-      </el-form-item>
-      <el-form-item label="電話" prop="phone">
-        <el-input v-model="createData.phone" placeholder="請輸入電話" />
-      </el-form-item>
-      <el-form-item label="Email" prop="email">
-        <el-input v-model="createData.email" placeholder="請輸入Email" />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button
-          type="danger"
-          text
-          size="large"
-          @click="handleCloseCreateDialog"
-          >取消
-        </el-button>
-        <el-button
-          type="primary"
-          size="large"
-          @click="(e) => handleCreateUser(e, createFormRef)"
-          >送出
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
-  <el-dialog
-    ref="updateDialogRef"
-    v-model="showUpdateDialog"
-    title="修改帳號"
-    :before-close="handleCloseUpdateDialog"
-  >
-    <el-form
-      ref="updateFormRef"
-      :model="updateData"
-      :rules="rules"
-      label-width="auto"
-      status-icon
-      hide-required-asterisk
-    >
-      <el-form-item label="角色名稱" prop="role">
-        <el-select
-          class="formSelect"
-          size="large"
-          v-model="updateData.role"
-          placeholder="選擇角色"
-        >
-          <el-option value="學校管理員" />
-          <el-option value="巡檢人員" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="使用者" prop="name">
-        <el-input v-model="updateData.name" placeholder="請輸入使用者" />
-      </el-form-item>
-      <el-form-item label="電話" prop="phone">
-        <el-input v-model="updateData.phone" placeholder="請輸入電話" />
-      </el-form-item>
-      <el-form-item label="Email" prop="email">
-        <el-input v-model="updateData.email" placeholder="請輸入Email" />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button
-          type="danger"
-          text
-          size="large"
-          @click="handleCloseUpdateDialog"
-          >取消
-        </el-button>
-        <el-button
-          type="primary"
-          size="large"
-          @click="(e) => handleUpdateUser(e, updateFormRef)"
-          >送出
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
-  <el-dialog
-    ref="ChangeDialogRef"
-    v-model="showChangeDialog"
-    title="重設密碼"
-    :before-close="handleCloseChangeDialog"
-  >
-    <div style="margin-bottom: 20px">
-      重設
-      <span class="showUserData">
-        {{ changeData.name }}({{ changeData.username }})
-      </span>
-      的密碼
-    </div>
-    <el-form
-      ref="changeFormRef"
-      :model="changeData"
-      :rules="rules"
-      label-width="auto"
-      status-icon
-      hide-required-asterisk
-    >
-      <el-form-item label="重設密碼" prop="password">
-        <el-input
-          v-model="changeData.password"
-          type="password"
-          autocomplete="off"
-          placeholder="請輸入新密碼"
-        />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button
-          type="danger"
-          text
-          size="large"
-          @click="handleCloseChangeDialog"
-          >取消
-        </el-button>
-        <el-button
-          type="primary"
-          size="large"
-          @click="(e) => handleChangePassword(e, changeFormRef)"
-          >送出
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
 </template>
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessageBox, ElNotification } from 'element-plus'
+import { ref, reactive, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '../stores/users'
+import AppUserListTableDialog from '../components/users/AppUserListTableDialog.vue'
+import AppUserCreateDialog from '../components/users/AppUserCreateDialog.vue'
+import AppUserUpdateDialog from '../components/users/AppUserUpdateDialog.vue'
+import AppUserChangeDialog from '../components/users/AppUserChangeDialog.vue'
 
 const userStore = useUserStore()
 const { users, isLoading } = storeToRefs(userStore)
-const { getUsers, createUser, updateUser, deleteUser, resetPassword } =
-  userStore
+const {
+  getUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+  resetPassword,
+} = userStore
 
-const handleShowCreateDialog = ref(false)
-const showUpdateDialog = ref(false)
-const showChangeDialog = ref(false)
+const user = ref({})
+const isShowCreateDialog = ref(false)
+const isShowUpdateDialog = ref(false)
+const isShowChangeDialog = ref(false)
 
-const createDialogRef = ref()
-const updateDialogRef = ref()
-const ChangeDialogRef = ref()
+const showCreateDialog = () => {
+  isShowCreateDialog.value = true
+}
 
-const createFormRef = ref()
-const updateFormRef = ref()
-const changeFormRef = ref()
+const showUpdateDialog = async (id) => {
+  user.value = await getUserById(id)
+  isShowUpdateDialog.value = true
+}
 
-const createData = ref({
-  role: [],
-  name: '',
-  username: '',
-  password: '',
-  phone: '',
-  email: '',
-})
-
-const updateData = ref({
-  id: null,
-  role: [],
-  name: '',
-  username: '',
-  phone: '',
-  email: '',
-})
-
-const changeData = ref({
-  id: null,
-  name: '',
-  username: '',
-  password: '',
-})
-
-onMounted(() => {
-  getUsers()
-})
-
-const search = ref('')
-const filterData = () =>
-  (tableData.value = users.value.filter(
-    (data) =>
-      !data.reserved &&
-      (!search.value ||
-        data.roles.some((r) => r.role.includes(search.value)) ||
-        data.name.includes(search.value) ||
-        data.username.includes(search.value) ||
-        data.phone.includes(search.value) ||
-        data.email.includes(search.value))
-  ))
+const showChangeDialog = async (id) => {
+  user.value = await getUserById(id)
+  isShowChangeDialog.value = true
+}
 
 const rules = reactive({
   role: [
@@ -314,10 +85,6 @@ const rules = reactive({
     { max: 255, message: '最多255個字元' },
   ],
   username: [
-    { required: true, message: '此欄位不得為空', trigger: 'blur' },
-    { max: 100, message: '最多100個字元' },
-  ],
-  password: [
     { required: true, message: '此欄位不得為空', trigger: 'blur' },
     { max: 100, message: '最多100個字元' },
   ],
@@ -333,181 +100,15 @@ const rules = reactive({
       trigger: 'blur',
     },
   ],
+  password: [
+    { required: true, message: '此欄位不得為空', trigger: 'blur' },
+    { max: 100, message: '最多100個字元', trigger: 'blur' },
+    { min: 6, message: '至少6個字元', trigger: 'blur' },
+  ],
 })
 
-//pagination
-const pageSize = ref(10)
-const page = ref(1)
-const tableData = ref([])
-const getFilteredData = computed(() => filterData())
-const getTableData = computed(() =>
-  filterData().slice(
-    (page.value - 1) * pageSize.value,
-    page.value * pageSize.value
-  )
-)
-const handlePageChange = (p) => {
-  page.value = p
-}
-
-const handleShowUpdateDialog = (row) => {
-  updateData.value.id = row.id
-  updateData.value.role = row.roles[0].role
-  updateData.value.name = row.name
-  updateData.value.username = row.username
-  updateData.value.phone = row.phone
-  updateData.value.email = row.email
-  showUpdateDialog.value = true
-}
-
-const handleChangeDialog = (row) => {
-  showChangeDialog.value = true
-  changeData.value.id = row.id
-  changeData.value.name = row.name
-  changeData.value.username = row.username
-}
-
-const handleCloseCreateDialog = () => {
-  handleShowCreateDialog.value = false
-  createFormRef.value.resetFields()
-  createFormRef.value.clearValidate()
-}
-
-const handleCloseUpdateDialog = () => {
-  showUpdateDialog.value = false
-  updateFormRef.value.resetFields()
-  updateFormRef.value.clearValidate()
-}
-
-const handleCloseChangeDialog = () => {
-  showChangeDialog.value = false
-  changeFormRef.value.resetFields()
-  changeFormRef.value.clearValidate()
-}
-
-const handleCreateUser = (e, formRef) => {
-  e.preventDefault()
-  formRef.validate(async (valid, fields) => {
-    if (valid) {
-      try {
-        const data = {
-          roles: [createData.value.role],
-          name: createData.value.name,
-          username: createData.value.username,
-          password: createData.value.password,
-          phone: createData.value.phone,
-          email: createData.value.email,
-        }
-        await createUser(data)
-        handleCloseCreateDialog()
-        ElNotification({
-          type: 'success',
-          message: '新增成功',
-        })
-      } catch (e) {
-        console.error(e)
-        ElNotification({
-          type: 'error',
-          message: '新增失敗',
-        })
-      }
-    }
-  })
-}
-
-const handleUpdateUser = (e, formRef) => {
-  e.preventDefault()
-  formRef.validate(async (valid, fields) => {
-    if (valid) {
-      try {
-        const data = {
-          roles: [updateData.value.role],
-          name: updateData.value.name,
-          username: updateData.value.username,
-          phone: updateData.value.phone,
-          email: updateData.value.email,
-        }
-        await updateUser(updateData.value.id, data)
-        handleCloseUpdateDialog()
-        ElNotification({
-          type: 'success',
-          message: '修改成功',
-        })
-      } catch (e) {
-        console.error(e)
-        ElNotification({
-          type: 'error',
-          message: '修改失敗',
-        })
-      }
-    }
-  })
-}
-
-const handleChangePassword = (e, formRef) => {
-  e.preventDefault()
-  formRef.validate(async (valid, fields) => {
-    if (valid) {
-      try {
-        await resetPassword(changeData.value.id, changeData.value.password)
-        handleCloseChangeDialog()
-        ElNotification({
-          type: 'success',
-          message: '重設密碼成功',
-        })
-      } catch (e) {
-        console.error(e)
-        ElNotification({
-          type: 'error',
-          message: '重設密碼失敗',
-        })
-      }
-    }
-  })
-}
-
-const handleDeleteUser = (row) => {
-  ElMessageBox.confirm(`是否確定要刪除${row.name}`, '', {
-    confirmButtonText: '確定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
-    .then(async () => {
-      try {
-        await deleteUser(row.id)
-        ElNotification({
-          type: 'success',
-          message: '刪除成功',
-        })
-      } catch (e) {
-        console.error(e)
-        ElNotification({
-          type: 'error',
-          message: '刪除失敗',
-        })
-      }
-    })
-    .catch(() => {
-      ElNotification({
-        type: 'info',
-        message: '取消刪除',
-      })
-    })
-}
+onMounted(() => {
+  getUsers()
+})
 </script>
-
-<style lang="scss" scoped>
-.dialog-footer {
-  button:first-child {
-    margin-right: 10px;
-  }
-}
-
-.formSelect {
-  width: 100%;
-}
-
-.showUserData {
-  font-weight: bold;
-}
-</style>
+<style lang="scss" scoped></style>
