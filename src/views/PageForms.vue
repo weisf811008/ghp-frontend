@@ -3,166 +3,45 @@
     <template #header>
       <div class="card-header">
         <h2>巡檢目錄</h2>
-        <el-button
-          size="large"
-          @click="() => (showCreateForm = true)"
-          icon="Plus"
-        >
+        <el-button size="large" @click.prevent="showCreateDrawer" icon="Plus">
           新增巡檢表單
         </el-button>
       </div>
     </template>
-    <el-input v-model="search" placeholder="Search" size="large" />
-    <el-table :data="getTableData" v-loading="isLoading" table-layout="auto">
-      <el-table-column label="項次" fixed align="center" width="60">
-        <template #default="scope">
-          {{ scope.$index + (page - 1) * pageSize + 1 }}
-        </template>
-      </el-table-column>
-      <el-table-column label="巡檢表單名稱" prop="title" width="200" />
-      <el-table-column label="備註" prop="remarks" />
-      <el-table-column label="操作" align="center" width="220">
-        <template #default="scope">
-          <el-button
-            type="primary"
-            text
-            size="large"
-            icon="EditPen"
-            @click="handleShowUpdateForm(scope.row)"
-          >
-            編輯
-          </el-button>
-          <el-button
-            type="danger"
-            text
-            size="large"
-            icon="Delete"
-            @click="handleDeleteForm(scope.row)"
-          >
-            刪除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <el-pagination
-      class="pages"
-      layout="prev, pager, next"
-      :page-size="pageSize"
-      :total="getFilteredData.length"
-      @current-change="handlePageChange"
+    <AppFormListTable
+      :forms="forms"
+      :isLoading="isLoading"
+      :delete="deleteForm"
+      :update="showUpdateDrawer"
+      @update="showUpdateDrawer"
+    />
+    <AppFormCreateDrawer
+      v-model:show="isShowCreateDrawer"
+      :isLoading="isLoading"
+      :rules="rules"
+      :create="createForm"
+      :getItems="getItems"
+      :getTransferList="getTransferList"
+    />
+    <AppFormUpdateDrawer
+      v-model:show="isShowUpdateDrawer"
+      :data="form"
+      :isLoading="isLoading"
+      :rules="rules"
+      :update="updateForm"
+      :getItems="getItems"
+      :getTransferList="getTransferList"
     />
   </el-card>
-  <el-drawer
-    ref="createDrawerRef"
-    v-model="showCreateForm"
-    title="巡檢表單建置"
-    :direction="direction"
-    size="80%"
-    :before-close="handleCloseCreateDrawer"
-  >
-    <el-form
-      ref="createFormRef"
-      :model="createData"
-      :rules="rules"
-      status-icon
-      hide-required-asterisk
-    >
-      <el-form-item label="巡檢表單名稱" prop="title">
-        <el-input v-model="createData.title" placeholder="請輸入巡檢目錄名稱" />
-      </el-form-item>
-      <div style="text-align: center">
-        <el-transfer
-          ref="createDataTransferRef"
-          v-model="createData.itemIds"
-          style="text-align: left; display: inline-block"
-          filterable
-          :render-content="handleRenderContent"
-          :titles="['檢核細項總清單', '檢核表單項目']"
-          :format="{
-            noChecked: '${total}',
-            hasChecked: '${checked}/${total}',
-          }"
-          :data="getTransferList()"
-        >
-        </el-transfer>
-      </div>
-    </el-form>
-    <template #footer>
-      <el-form-item label="備註">
-        <el-input v-model="createData.remarks" />
-      </el-form-item>
-      <div style="flex: auto">
-        <el-button size="large" @click="handleCloseCreateDrawer"
-          >取消</el-button
-        >
-        <el-button
-          type="primary"
-          size="large"
-          @click="(e) => handleCreateForm(e, createFormRef)"
-          >送出
-        </el-button>
-      </div>
-    </template>
-  </el-drawer>
-  <el-drawer
-    ref="updateDrawerRef"
-    v-model="showUpdateForm"
-    title="巡檢表單修改"
-    :direction="direction"
-    size="80%"
-    :before-close="handleCloseUpdateDrawer"
-  >
-    <el-form
-      ref="updateFormRef"
-      :model="updateData"
-      :rules="rules"
-      status-icon
-      hide-required-asterisk
-    >
-      <el-form-item label="巡檢目錄名稱" prop="title">
-        <el-input v-model="updateData.title" placeholder="請輸入巡檢目錄名稱" />
-      </el-form-item>
-      <div style="text-align: center">
-        <el-transfer
-          ref="updateDataTransferRef"
-          v-model="updateData.itemIds"
-          style="text-align: left; display: inline-block"
-          filterable
-          :render-content="handleRenderContent"
-          :titles="['檢核細項總清單', '檢核表單項目']"
-          :format="{
-            noChecked: '${total}',
-            hasChecked: '${checked}/${total}',
-          }"
-          :data="getTransferList()"
-        >
-        </el-transfer>
-      </div>
-    </el-form>
-    <template #footer>
-      <el-form-item label="備註">
-        <el-input v-model="updateData.remarks" />
-      </el-form-item>
-      <div style="flex: auto">
-        <el-button size="large" @click="handleCloseUpdateDrawer"
-          >取消</el-button
-        >
-        <el-button
-          type="primary"
-          size="large"
-          @click="(e) => handleUpdateForm(e, updateFormRef)"
-          >送出
-        </el-button>
-      </div>
-    </template>
-  </el-drawer>
 </template>
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessageBox, ElNotification } from 'element-plus'
+import { ref, reactive, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useFormStore } from '../stores/form'
 import { useItemStore } from '../stores/items'
+import AppFormListTable from '../components/form/AppFormListTable.vue'
+import AppFormCreateDrawer from '../components/form/AppFormCreateDrawer.vue'
+import AppFormUpdateDrawer from '../components/form/AppFormUpdateDrawer.vue'
 
 const formStore = useFormStore()
 const { forms, isLoading } = storeToRefs(formStore)
@@ -171,43 +50,15 @@ const { getForms, getFormById, createForm, updateForm, deleteForm } = formStore
 const itemStore = useItemStore()
 const { getItems, getTransferList } = itemStore
 
-const drawer = ref(false)
-const direction = ref('rtl')
+const form = ref()
+const isShowCreateDrawer = ref(false)
+const isShowUpdateDrawer = ref(false)
 
-const showCreateForm = ref(false)
-const showUpdateForm = ref(false)
-const createDrawerRef = ref()
-const UpdateDrawerRef = ref()
-const createFormRef = ref()
-const updateFormRef = ref()
-const createDataTransferRef = ref()
-const updateDataTransferRef = ref()
-const createData = ref({
-  title: '',
-  remarks: '',
-  itemIds: [],
-})
-
-const updateData = ref({
-  id: null,
-  title: '',
-  remarks: '',
-  itemIds: [],
-})
-
-const search = ref('')
-const filterData = () =>
-  (tableData.value = forms.value.filter(
-    (data) =>
-      !search.value ||
-      data.title.includes(search.value) ||
-      data.remarks.includes(search.value)
-  ))
-
-onMounted(() => {
-  getForms()
-  getItems()
-})
+const showCreateDrawer = () => (isShowCreateDrawer.value = true)
+const showUpdateDrawer = async (id) => {
+  form.value = await getFormById(id)
+  isShowUpdateDrawer.value = true
+}
 
 const rules = reactive({
   title: [
@@ -219,185 +70,10 @@ const rules = reactive({
   ],
 })
 
-//pagination
-const pageSize = ref(10)
-const page = ref(1)
-const tableData = ref([])
-const getFilteredData = computed(() => filterData())
-const getTableData = computed(() =>
-  filterData().slice(
-    (page.value - 1) * pageSize.value,
-    page.value * pageSize.value
-  )
-)
-
-const handlePageChange = (p) => {
-  page.value = p
-}
-
-const handleRenderContent = (h, option) => {
-  return h('span', null, option.label)
-}
-
-const handleShowUpdateForm = async (row) => {
-  const form = await getFormById(row.id)
-  updateData.value.id = form.id
-  updateData.value.title = form.title
-  updateData.value.remarks = form.remarks
-  updateData.value.itemIds = form.details.map((i) => i.itemId)
-  showUpdateForm.value = true
-}
-
-const handleCloseCreateDrawer = () => {
-  showCreateForm.value = false
-  createData.value.itemIds = []
-  createData.value.remarks = ''
-  createFormRef.value.resetFields()
-  createFormRef.value.clearValidate()
-  createDataTransferRef.value.clearQuery('left')
-  createDataTransferRef.value.clearQuery('right')
-}
-
-const handleCloseUpdateDrawer = () => {
-  showUpdateForm.value = false
-  updateFormRef.value.resetFields()
-  updateFormRef.value.clearValidate()
-  updateDataTransferRef.value.clearQuery('left')
-  updateDataTransferRef.value.clearQuery('right')
-}
-
-const handleCreateForm = (e, formRef) => {
-  e.preventDefault()
-  if (createData.value.itemIds.length === 0) {
-    ElNotification({
-      type: 'error',
-      message: '新增失敗，請選取檢核細項',
-    })
-  } else {
-    formRef.validate(async (valid, fields) => {
-      if (valid) {
-        try {
-          const data = {
-            title: createData.value.title,
-            remarks: createData.value.remarks,
-            itemIds: createData.value.itemIds,
-          }
-          await createForm(data)
-          handleCloseCreateDrawer()
-          ElNotification({
-            type: 'success',
-            message: '新增成功',
-          })
-        } catch (e) {
-          console.error(e)
-          ElNotification({
-            type: 'error',
-            message: '新增失敗',
-          })
-        }
-      }
-    })
-  }
-}
-
-const handleUpdateForm = (e, formRef) => {
-  e.preventDefault()
-  if (updateData.value.itemIds.length === 0) {
-    ElNotification({
-      type: 'error',
-      message: '修改失敗，請選取檢核細項',
-    })
-  } else {
-    formRef.validate(async (valid, fields) => {
-      if (valid) {
-        try {
-          const data = {
-            id: updateData.value.id,
-            title: updateData.value.title,
-            remarks: updateData.value.remarks,
-            itemIds: updateData.value.itemIds,
-          }
-          await updateForm(updateData.value.id, data)
-          handleCloseUpdateDrawer()
-          ElNotification({
-            type: 'success',
-            message: '修改成功',
-          })
-        } catch (e) {
-          console.error(e)
-          ElNotification({
-            type: 'error',
-            message: '修改失敗',
-          })
-        }
-      }
-    })
-  }
-}
-
-const handleDeleteForm = (row) => {
-  ElMessageBox.confirm(`是否確定要刪除${row.title}`, '', {
-    confirmButtonText: '確定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
-    .then(async () => {
-      try {
-        await deleteForm(row.id)
-        ElNotification({
-          type: 'success',
-          message: '刪除成功',
-        })
-      } catch (e) {
-        console.error(e)
-        ElNotification({
-          type: 'error',
-          message: '刪除失敗',
-        })
-      }
-    })
-    .catch(() => {
-      ElNotification({
-        type: 'info',
-        message: '取消刪除',
-      })
-    })
-}
+onMounted(() => {
+  getForms()
+  getItems()
+})
 </script>
 
-<style lang="scss" scoped>
-.dialog-footer {
-  button:first-child {
-    margin-right: 10px;
-  }
-}
-
-:deep(.el-transfer) {
-  width: 75vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-:deep(.el-transfer-panel) {
-  width: 30vw;
-}
-
-:deep(.el-input__wrapper) {
-  width: 25vw;
-}
-
-:deep(.el-transfer-panel__body) {
-  height: 50vh;
-  padding: 5px;
-}
-
-@media screen and (max-width: 1080px) {
-  :deep(.el-transfer-panel) {
-    width: 25vw;
-  }
-  :deep(.el-input__wrapper) {
-    width: 20vw;
-  }
-}
-</style>
+<style lang="scss" scoped></style>
