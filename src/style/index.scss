@@ -16,10 +16,26 @@ body {
         margin: 0;
       }
     }
+
+    .page-group {
+      margin-top: 20px;
+      display: flex;
+      justify-content: end;
+    }
+
     .pages {
-      justify-content: flex-end;
+      justify-content: end;
     }
   }
+
+  .formSelect {
+    width: 100%;
+  }
+
+  .cancel-button {
+    margin-right: 10px;
+  }
+
   .pass {
     color: #67c23a;
   }
