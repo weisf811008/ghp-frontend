@@ -12,7 +12,6 @@
       :categories="categories"
       :isLoading="isLoading"
       :delete="deleteCategory"
-      :update="showUpdateDialog"
       @update="showUpdateDialog"
     />
     <AppCreateDialog
