@@ -17,7 +17,7 @@
               <el-input
                 v-model="loginData.username"
                 size="large"
-                @keyup.enter="(e) => handleSubmit(e, loginFormRef)"
+                @keyup.enter="() => handleSubmit(loginFormRef)"
                 placeholder="請輸入帳號"
               />
             </el-form-item>
@@ -27,7 +27,7 @@
                 type="password"
                 size="large"
                 autocomplete="off"
-                @keyup.enter="(e) => handleSubmit(e, loginFormRef)"
+                @keyup.enter="() => handleSubmit(loginFormRef)"
                 placeholder="請輸入密碼"
               />
             </el-form-item>
@@ -35,7 +35,7 @@
               <el-button
                 class="login-button"
                 size="large"
-                @click="(e) => handleSubmit(e, loginFormRef)"
+                @click.prevent="() => handleSubmit(loginFormRef)"
               >
                 登入
               </el-button>
@@ -71,8 +71,7 @@ const rules = reactive({
   password: [{ required: true, message: '必填', trigger: 'blur' }],
 })
 
-const handleSubmit = async (e, formRef) => {
-  e.preventDefault()
+const handleSubmit = async (formRef) => {
   if (!formRef) return
   await formRef.validate(async (valid, fields) => {
     if (valid) {

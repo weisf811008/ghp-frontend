@@ -157,14 +157,14 @@
             type="danger"
             text
             size="large"
-            @click="handleCloseInspectForm"
+            @click.prevent="handleCloseInspectForm"
           >
             取消
           </el-button>
           <el-button
             type="primary"
             size="large"
-            @click="(e) => handleSubmitInspectForm(e, submitFormRef)"
+            @click.prevent="() => handleSubmitInspectForm(submitFormRef)"
           >
             送出
           </el-button>
@@ -352,8 +352,7 @@ const handleCloseInspectForm = () => {
   router.push({ name: 'Inspection' })
 }
 
-const handleSubmitInspectForm = async (e, formRef) => {
-  e.preventDefault()
+const handleSubmitInspectForm = async (formRef) => {
   formRef.validate(async (valid, fields) => {
     updateData.value.details = Object.values(inspectionDetailMap.value)
     uncheckedItems.value = updateData.value.details
