@@ -16,20 +16,20 @@ export const useAdminUserStore = defineStore(resource, () => {
     isLoading.value = false
   }
 
+  //取得一個帳號
+  const getAdminUserById = async (id) => {
+    isLoading.value = true
+    const res = await request.get(`${resource}/${id}`)
+    isLoading.value = false
+    return res.data
+  }
+
   //新增一個帳號
   const createAdminUser = async (data) => {
     isLoading.value = true
     await request.post(resource, data)
     isLoading.value = false
     await getAdminUsers()
-  }
-
-  //取得一個帳號
-  const getAdminUser = async (id) => {
-    isLoading.value = true
-    const res = await request.get(`${resource}/${id}`)
-    isLoading.value = false
-    return res.data
   }
 
   //修改一個帳號
@@ -59,7 +59,7 @@ export const useAdminUserStore = defineStore(resource, () => {
     adminUsers,
     isLoading,
     getAdminUsers,
-    getAdminUser,
+    getAdminUserById,
     createAdminUser,
     updateAdminUser,
     deleteAdminUser,
