@@ -16,6 +16,14 @@ export const useUserStore = defineStore(resource, () => {
     isLoading.value = false
   }
 
+  //取得一個帳號
+  const getUserById = async (id) => {
+    isLoading.value = true
+    const res = await request.get(`${resource}/${id}`)
+    isLoading.value = false
+    return res.data
+  }
+
   //新增一個帳號
   const createUser = async (data) => {
     isLoading.value = true
@@ -51,6 +59,7 @@ export const useUserStore = defineStore(resource, () => {
     users,
     isLoading,
     getUsers,
+    getUserById,
     createUser,
     updateUser,
     deleteUser,
