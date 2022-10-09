@@ -1,51 +1,57 @@
 <template>
-  <el-dialog v-model="isShow" title="重設密碼" @open="handleOpenDialog">
-    <div style="margin-bottom: 20px">
-      重設
-      <span class="showUserData"> {{ data.name }}({{ data.username }}) </span>
-      的密碼
-    </div>
-    <el-form
-      ref="formRef"
-      :model="changeData"
-      :rules="rules"
-      size="large"
-      label-width="auto"
-      status-icon
-      hide-required-asterisk
-    >
-      <el-form-item label="新密碼" prop="password">
-        <el-input
-          v-model="changeData.password"
-          type="password"
-          autocomplete="off"
-          placeholder="請輸入新密碼"
-        />
-      </el-form-item>
-      <el-form-item label="確認密碼" prop="confirmPassword">
-        <el-input
-          v-model="changeData.confirmPassword"
-          type="password"
-          autocomplete="off"
-          placeholder="請再輸入一次密碼"
-        />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button type="danger" text size="large" @click.prevent="closeDialog"
-          >取消
-        </el-button>
-        <el-button
-          type="primary"
-          size="large"
-          @click.prevent="() => changePassword(formRef)"
-        >
-          送出
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
+  <div>
+    <el-dialog v-model="isShow" title="重設密碼" @open="handleOpenDialog">
+      <div style="margin-bottom: 20px">
+        重設
+        <span class="showUserData"> {{ data.name }}({{ data.username }}) </span>
+        的密碼
+      </div>
+      <el-form
+        ref="formRef"
+        :model="changeData"
+        :rules="rules"
+        size="large"
+        label-width="auto"
+        status-icon
+        hide-required-asterisk
+      >
+        <el-form-item label="新密碼" prop="password">
+          <el-input
+            v-model="changeData.password"
+            type="password"
+            autocomplete="off"
+            placeholder="請輸入新密碼"
+          />
+        </el-form-item>
+        <el-form-item label="確認密碼" prop="confirmPassword">
+          <el-input
+            v-model="changeData.confirmPassword"
+            type="password"
+            autocomplete="off"
+            placeholder="請再輸入一次密碼"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button
+            type="danger"
+            text
+            size="large"
+            @click.prevent="closeDialog"
+            >取消
+          </el-button>
+          <el-button
+            type="primary"
+            size="large"
+            @click.prevent="() => changePassword(formRef)"
+          >
+            送出
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup>
