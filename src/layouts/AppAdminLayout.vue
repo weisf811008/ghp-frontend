@@ -26,7 +26,7 @@ const { showMenu } = storeToRefs(menuStore)
 body {
   margin: 0;
   .layout-container {
-    height: 99vh;
+    height: 97vh;
 
     .el-header {
       position: sticky;

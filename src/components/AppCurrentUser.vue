@@ -5,7 +5,7 @@
         icon="Menu"
         size="large"
         class="hidden-md-and-up"
-        @click.prevent="() => (showMenu = !showMenu)"
+        @click.prevent="menuStore.toggleShowMenu"
       >
       </el-button>
     </span>
@@ -40,7 +40,6 @@ const { user } = storeToRefs(authStore)
 const { logoutUser } = authStore
 
 const menuStore = useMenuStore()
-const { showMenu } = storeToRefs(menuStore)
 
 const handleLogout = async (e) => {
   e.preventDefault()
