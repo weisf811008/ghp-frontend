@@ -20,10 +20,12 @@
       :isLoading="isLoading"
       :rules="rules"
       :create="createAdminUser"
+      :schools="schools"
     />
     <AppAdminUserUpdateDialog
       v-model:show="isShowUpdateDialog"
       :data="adminUser"
+      :schools="schools"
       :isLoading="isLoading"
       :rules="rules"
       :update="updateAdminUser"
@@ -41,7 +43,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAdminUserStore } from '../stores/adminUsers'
 import { useAdminSchoolStore } from '../stores/adminSchool'
-import AppAdminUserListTableDialog from '../components/adminUsers/AppAdminUserListTableDialog.vue'
+import AppAdminUserListTableDialog from '../components/adminUsers/AppAdminUserListTable.vue'
 import AppAdminUserCreateDialog from '../components/adminUsers/AppAdminUserCreateDialog.vue'
 import AppAdminUserUpdateDialog from '../components/adminUsers/AppAdminUserUpdateDialog.vue'
 
