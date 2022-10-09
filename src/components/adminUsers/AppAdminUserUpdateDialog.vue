@@ -1,55 +1,72 @@
 <template>
-  <el-dialog v-model="isShow" title="修改帳號" @open="handleOpenDialog">
-    <el-form
-      ref="formRef"
-      :model="newData"
-      :disabled="isLoading"
-      :rules="rules"
-      size="large"
-      label-width="auto"
-      status-icon
-      hide-required-asterisk
-    >
-      <el-form-item label="角色名稱" prop="roles">
-        <el-select
-          class="formSelect"
-          size="large"
-          v-model="newData.roles"
-          placeholder="選擇角色"
-        >
-          <el-option value="學校管理員" />
-          <el-option value="巡檢人員" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="使用者" prop="name">
-        <el-input v-model="newData.name" placeholder="請輸入使用者" />
-      </el-form-item>
-      <el-form-item label="電話" prop="phone">
-        <el-input v-model="newData.phone" placeholder="請輸入電話" />
-      </el-form-item>
-      <el-form-item label="Email" prop="email">
-        <el-input v-model="newData.email" placeholder="請輸入Email" />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button
-          type="danger"
-          text
-          size="large"
-          class="cancel-button"
-          @click.prevent="closeDialog"
-          >取消
-        </el-button>
-        <el-button
-          type="primary"
-          size="large"
-          @click.prevent="() => updateAdminUser(formRef)"
-          >送出
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
+  <div>
+    <el-dialog v-model="isShow" title="修改帳號" @open="handleOpenDialog">
+      <el-form
+        ref="formRef"
+        :model="newData"
+        :disabled="isLoading"
+        :rules="rules"
+        size="large"
+        label-width="auto"
+        status-icon
+        hide-required-asterisk
+      >
+        <el-form-item label="學校名稱" prop="schoolId">
+          <el-select
+            class="formSelect"
+            size="large"
+            v-model="newData.schoolId"
+            placeholder="選擇學校"
+          >
+            <el-option
+              v-for="school in schools"
+              :value="school.id"
+              :label="school.name"
+              :key="`select-school-${school.id}`"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="角色名稱" prop="roles">
+          <el-select
+            class="formSelect"
+            size="large"
+            v-model="newData.roles"
+            placeholder="選擇角色"
+          >
+            <el-option value="學校管理員" />
+            <el-option value="巡檢人員" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="使用者" prop="name">
+          <el-input v-model="newData.name" placeholder="請輸入使用者" />
+        </el-form-item>
+        <el-form-item label="電話" prop="phone">
+          <el-input v-model="newData.phone" placeholder="請輸入電話" />
+        </el-form-item>
+        <el-form-item label="Email" prop="email">
+          <el-input v-model="newData.email" placeholder="請輸入Email" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button
+            type="danger"
+            text
+            size="large"
+            class="cancel-button"
+            @click.prevent="closeDialog"
+            >取消
+          </el-button>
+          <el-button
+            type="primary"
+            size="large"
+            @click.prevent="() => updateAdminUser(formRef)"
+            >送出
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup>
@@ -63,6 +80,9 @@ const props = defineProps({
   data: {
     type: Object,
     required: true,
+  },
+  schools: {
+    type: Array,
   },
   isLoading: {
     type: Boolean,
@@ -87,6 +107,7 @@ const isShow = computed({
 
 const formRef = ref()
 const newData = ref({
+  schoolId: null,
   roles: [],
   name: null,
   phone: null,
@@ -95,7 +116,8 @@ const newData = ref({
 
 const handleOpenDialog = () => {
   newData.value = {
-    roles: props.data.roles[0],
+    schoolId: props.data.schoolId,
+    roles: props.data.roles[0].role,
     name: props.data.name,
     phone: props.data?.phone,
     email: props.data?.email,
@@ -113,7 +135,8 @@ const updateAdminUser = (form) => {
     if (valid && props.data) {
       try {
         const data = {
-          roles: newData.value.roles,
+          schoolId: newData.value.schoolId,
+          roles: [newData.value.roles],
           name: newData.value.name,
           phone: newData.value.phone,
           email: newData.value.email,

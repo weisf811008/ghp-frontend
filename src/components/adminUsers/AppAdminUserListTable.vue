@@ -7,6 +7,12 @@
           {{ scope.$index + (page - 1) * pageSize + 1 }}
         </template>
       </el-table-column>
+      <el-table-column
+        label="學校名稱"
+        prop="school.name"
+        align="center"
+        width="100"
+      />
       <el-table-column label="角色名稱" prop="roles" align="center" width="100">
         <template #default="scope">
           {{ scope.row.roles.map((r) => r.role).join(', ') }}
@@ -106,6 +112,10 @@ const filterData = computed(
           data.email.includes(search.value))
     ))
 )
+
+const schoolList = ref({
+  schoolId: null,
+})
 
 //pagination
 const page = ref(1)

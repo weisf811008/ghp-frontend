@@ -1,66 +1,83 @@
 <template>
-  <el-dialog v-model="isShow" title="新增帳號" @open="handleOpenDialog">
-    <el-form
-      ref="formRef"
-      :model="newData"
-      :disabled="isLoading"
-      :rules="rules"
-      size="large"
-      label-width="auto"
-      status-icon
-      hide-required-asterisk
-    >
-      <el-form-item label="角色名稱" prop="role">
-        <el-select
-          class="formSelect"
-          size="large"
-          v-model="newData.role"
-          placeholder="選擇角色"
-        >
-          <el-option value="學校管理員" />
-          <el-option value="巡檢人員" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="使用者" prop="name">
-        <el-input v-model="newData.name" placeholder="請輸入使用者" />
-      </el-form-item>
-      <el-form-item label="帳號" prop="username">
-        <el-input v-model="newData.username" placeholder="請輸入帳號" />
-      </el-form-item>
-      <el-form-item label="密碼" prop="password">
-        <el-input
-          v-model="newData.password"
-          type="password"
-          autocomplete="off"
-          placeholder="請輸入密碼"
-        />
-      </el-form-item>
-      <el-form-item label="電話" prop="phone">
-        <el-input v-model="newData.phone" placeholder="請輸入電話" />
-      </el-form-item>
-      <el-form-item label="Email" prop="email">
-        <el-input v-model="newData.email" placeholder="請輸入Email" />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button
-          type="danger"
-          text
-          size="large"
-          class="cancel-button"
-          @click.prevent="closeDialog"
-          >取消
-        </el-button>
-        <el-button
-          type="primary"
-          size="large"
-          @click.prevent="() => createUser(formRef)"
-          >送出
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
+  <div>
+    <el-dialog v-model="isShow" title="新增帳號" @open="handleOpenDialog">
+      <el-form
+        ref="formRef"
+        :model="newData"
+        :disabled="isLoading"
+        :rules="rules"
+        size="large"
+        label-width="auto"
+        status-icon
+        hide-required-asterisk
+      >
+        <el-form-item label="選擇學校名稱" prop="schoolId">
+          <el-select
+            class="formSelect"
+            size="large"
+            v-model="newData.schoolId"
+            placeholder="選擇學校"
+          >
+            <el-option
+              v-for="school in schools"
+              :value="school.id"
+              :label="school.name"
+              :key="`select-school-${school.id}`"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="角色名稱" prop="role">
+          <el-select
+            class="formSelect"
+            size="large"
+            v-model="newData.role"
+            placeholder="選擇角色"
+          >
+            <el-option value="學校管理員" />
+            <el-option value="巡檢人員" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="使用者" prop="name">
+          <el-input v-model="newData.name" placeholder="請輸入使用者" />
+        </el-form-item>
+        <el-form-item label="帳號" prop="username">
+          <el-input v-model="newData.username" placeholder="請輸入帳號" />
+        </el-form-item>
+        <el-form-item label="密碼" prop="password">
+          <el-input
+            v-model="newData.password"
+            type="password"
+            autocomplete="off"
+            placeholder="請輸入密碼"
+          />
+        </el-form-item>
+        <el-form-item label="電話" prop="phone">
+          <el-input v-model="newData.phone" placeholder="請輸入電話" />
+        </el-form-item>
+        <el-form-item label="Email" prop="email">
+          <el-input v-model="newData.email" placeholder="請輸入Email" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button
+            type="danger"
+            text
+            size="large"
+            class="cancel-button"
+            @click.prevent="closeDialog"
+            >取消
+          </el-button>
+          <el-button
+            type="primary"
+            size="large"
+            @click.prevent="() => createUser(formRef)"
+            >送出
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup>
@@ -78,6 +95,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  schools: {
+    type: Array,
+    default: [],
+  },
   create: {
     type: Function,
     required: true,
@@ -93,6 +114,7 @@ const isShow = computed({
 
 const formRef = ref()
 const newData = ref({
+  schoolId: null,
   role: [],
   name: null,
   username: null,
@@ -115,6 +137,7 @@ const createUser = (form) => {
     if (valid) {
       try {
         const data = {
+          schoolId: newData.value.schoolId,
           roles: [newData.value.role],
           name: newData.value.name,
           username: newData.value.username,
