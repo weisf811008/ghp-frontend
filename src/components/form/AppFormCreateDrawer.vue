@@ -1,61 +1,63 @@
 <template>
-  <el-drawer
-    v-model="isShow"
-    title="巡檢表單建置"
-    size="80%"
-    @open="handleOpenDrawer"
-  >
-    <el-form
-      ref="formRef"
-      :model="newData"
-      :disabled="isLoading"
-      :rules="rules"
-      size="large"
-      status-icon
-      hide-required-asterisk
+  <div>
+    <el-drawer
+      v-model="isShow"
+      title="巡檢表單建置"
+      size="80%"
+      @open="handleOpenDrawer"
     >
-      <el-form-item label="巡檢表單名稱" prop="title">
-        <el-input v-model="newData.title" placeholder="請輸入巡檢目錄名稱" />
-      </el-form-item>
-      <el-form-item style="text-align: center">
-        <el-transfer
-          ref="newDataTransferRef"
-          v-model="newData.itemIds"
-          style="text-align: left; display: inline-block"
-          filterable
-          filter-placeholder="請輸入關鍵字"
-          :render-content="handleRenderContent"
-          :titles="['檢核細項總清單', '檢核表單項目']"
-          :format="{
-            noChecked: '${total}',
-            hasChecked: '${checked}/${total}',
-          }"
-          :data="getTransferList()"
-        >
-        </el-transfer>
-      </el-form-item>
-      <el-form-item label="備註" prop="remarks">
-        <el-input v-model="newData.remarks" />
-      </el-form-item>
-      <div class="footer-buttons">
-        <el-button
-          type="danger"
-          text
-          size="large"
-          class="cancel-button"
-          @click.prevent="closeDrawer"
-        >
-          取消
-        </el-button>
-        <el-button
-          type="primary"
-          size="large"
-          @click.prevent="() => createForm(formRef)"
-          >送出
-        </el-button>
-      </div>
-    </el-form>
-  </el-drawer>
+      <el-form
+        ref="formRef"
+        :model="newData"
+        :disabled="isLoading"
+        :rules="rules"
+        size="large"
+        status-icon
+        hide-required-asterisk
+      >
+        <el-form-item label="巡檢表單名稱" prop="title">
+          <el-input v-model="newData.title" placeholder="請輸入巡檢目錄名稱" />
+        </el-form-item>
+        <el-form-item style="text-align: center">
+          <el-transfer
+            ref="newDataTransferRef"
+            v-model="newData.itemIds"
+            style="text-align: left; display: inline-block"
+            filterable
+            filter-placeholder="請輸入關鍵字"
+            :render-content="handleRenderContent"
+            :titles="['檢核細項總清單', '檢核表單項目']"
+            :format="{
+              noChecked: '${total}',
+              hasChecked: '${checked}/${total}',
+            }"
+            :data="getTransferList()"
+          >
+          </el-transfer>
+        </el-form-item>
+        <el-form-item label="備註" prop="remarks">
+          <el-input v-model="newData.remarks" />
+        </el-form-item>
+        <div class="footer-buttons">
+          <el-button
+            type="danger"
+            text
+            size="large"
+            class="cancel-button"
+            @click.prevent="closeDrawer"
+          >
+            取消
+          </el-button>
+          <el-button
+            type="primary"
+            size="large"
+            @click.prevent="() => createForm(formRef)"
+            >送出
+          </el-button>
+        </div>
+      </el-form>
+    </el-drawer>
+  </div>
 </template>
 
 <script setup>
