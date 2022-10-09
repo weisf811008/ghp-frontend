@@ -1,16 +1,19 @@
 <template>
   <div>
-    <el-dialog v-model="isShow" title="新增訪視表條文" @open="handleOpenDialog">
+    <el-dialog v-model="isShow" title="修改訪視表條文" @open="handleOpenDialog">
       <el-form
         ref="formRef"
         :model="newData"
-        :disabled="isLoading"
         :rules="rules"
+        :disabled="isLoading"
         size="large"
         label-width="auto"
         status-icon
         hide-required-asterisk
       >
+        <el-form-item label="編號" prop="code">
+          {{ newData.code }}
+        </el-form-item>
         <el-form-item label="類別" prop="class">
           <el-select
             class="formSelect"
@@ -20,9 +23,6 @@
           >
             <el-option label="衛生訪視內容" value="衛生訪視內容" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="編號" prop="code">
-          <el-input v-model="newData.code" placeholder="請輸入編號" />
         </el-form-item>
         <el-form-item label="訪視項目" prop="description">
           <el-input
@@ -34,19 +34,19 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <span>
+        <span class="dialog-footer">
           <el-button
             type="danger"
             text
             size="large"
             class="cancel-button"
-            @click.prevent="CloseDialog"
+            @click.prevent="closeDialog"
             >取消
           </el-button>
           <el-button
             type="primary"
             size="large"
-            @click.prevent="() => createVisitingForm(formRef)"
+            @click.prevent="() => updateVisingForm(formRef)"
             >送出
           </el-button>
         </span>
@@ -54,12 +54,17 @@
     </el-dialog>
   </div>
 </template>
+
 <script setup>
 import { ref, computed } from 'vue'
 
 const props = defineProps({
   show: {
     type: Boolean,
+    default: false,
+  },
+  data: {
+    type: Object,
     default: false,
   },
   isLoading: {
@@ -70,7 +75,7 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  create: {
+  update: {
     type: Function,
     required: true,
   },
@@ -85,39 +90,45 @@ const isShow = computed({
 
 const formRef = ref()
 const newData = ref({
-  class: '衛生訪視內容',
+  class: null,
   code: null,
   description: null,
 })
 
 const handleOpenDialog = () => {
+  newData.value = {
+    code: props.data?.code,
+    class: props.data?.class,
+    description: props.data?.description,
+  }
   formRef.value.resetFields()
   formRef.value.clearValidate()
 }
 
-const CloseDialog = () => {
+const closeDialog = () => {
   emit('update:show', false)
 }
 
-const createVisitingForm = (form) => {
+const updateVisingForm = (form) => {
   form.validate(async (valid, firlds) => {
-    if (valid) {
+    if (valid && props.data) {
       try {
-        await props.create(newData.value)
-        CloseDialog()
+        await props.update(props.data.id, newData.value)
+        closeDialog()
         ElNotification({
           type: 'success',
-          message: '新增成功',
+          message: '修改成功',
         })
       } catch (e) {
         console.error(e)
         ElNotification({
           type: 'error',
-          message: '新增失敗',
+          message: '修改失敗',
         })
       }
     }
   })
 }
 </script>
+
 <style lang="scss" scoped></style>
