@@ -7,7 +7,6 @@ const resource = 'inspections'
 
 export const useInspectionStore = defineStore(resource, () => {
   const inspections = ref([])
-  const createFormId = ref(null)
   const files = ref('')
   const isLoading = ref(false)
 
@@ -35,7 +34,7 @@ export const useInspectionStore = defineStore(resource, () => {
     return res.data
   }
 
-  //修改一筆巡檢紀錄 *****有點問題
+  //修改一筆巡檢紀錄
   const updateInspection = async (id, data) => {
     isLoading.value = true
     await request.put(`${resource}/${id}`, data)
@@ -58,16 +57,9 @@ export const useInspectionStore = defineStore(resource, () => {
     isLoading.value = false
   }
 
-  //取得表單清單
-  const setCreateFormId = (formId) => {
-    createFormId.value = formId
-  }
-
   return {
     isLoading,
     inspections,
-    createFormId,
-    setCreateFormId,
     getInspections,
     createInspection,
     getInspection,
