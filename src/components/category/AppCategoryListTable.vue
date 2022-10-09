@@ -54,7 +54,6 @@ const props = defineProps({
   },
   update: {
     type: Function,
-    required: true,
   },
   delete: {
     type: Function,
