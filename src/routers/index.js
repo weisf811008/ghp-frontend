@@ -49,7 +49,7 @@ const router = createRouter({
       component: () => import('../views/PageInspection.vue'),
     },
     {
-      path: '/inspection/submitting',
+      path: '/inspection/submitting/:formId',
       name: 'InspectionSubmitting',
       component: () => import('../views/PageInspectionSubmitting.vue'),
     },
