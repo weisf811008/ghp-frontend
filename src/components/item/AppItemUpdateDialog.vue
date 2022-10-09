@@ -1,135 +1,137 @@
 <template>
-  <el-dialog v-model="isShow" title="修改細項" @open="handleOpenDialog">
-    <el-form
-      ref="formRef"
-      :model="newData"
-      :rules="rules"
-      :disabled="isLoading"
-      size="large"
-      label-width="auto"
-      status-icon
-      hide-required-asterisk
-    >
-      <el-form-item label="編號" prop="no">
-        {{ newData.no }}
-      </el-form-item>
-      <el-form-item label="檢核大項" prop="categoryId">
-        <el-select
-          class="formSelect"
-          size="large"
-          v-model="newData.categoryId"
-          placeholder="選擇大項"
-        >
-          <el-option
-            v-for="category in categories"
-            :value="category.id"
-            :label="category.category"
-            :key="`select-category-${category.id}`"
+  <div>
+    <el-dialog v-model="isShow" title="修改細項" @open="handleOpenDialog">
+      <el-form
+        ref="formRef"
+        :model="newData"
+        :rules="rules"
+        :disabled="isLoading"
+        size="large"
+        label-width="auto"
+        status-icon
+        hide-required-asterisk
+      >
+        <el-form-item label="編號" prop="no">
+          {{ newData.no }}
+        </el-form-item>
+        <el-form-item label="檢核大項" prop="categoryId">
+          <el-select
+            class="formSelect"
+            size="large"
+            v-model="newData.categoryId"
+            placeholder="選擇大項"
+          >
+            <el-option
+              v-for="category in categories"
+              :value="category.id"
+              :label="category.category"
+              :key="`select-category-${category.id}`"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="檢核細項" prop="item">
+          <el-input
+            v-model="newData.item"
+            rows="2"
+            type="textarea"
+            placeholder="請輸入檢核細項"
           />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="檢核細項" prop="item">
-        <el-input
-          v-model="newData.item"
-          rows="2"
-          type="textarea"
-          placeholder="請輸入檢核細項"
-        />
-      </el-form-item>
-      <el-form-item label="週期" prop="period">
-        <el-select
-          class="formSelect"
-          size="large"
-          v-model="newData.period"
-          placeholder="請選擇或輸入週期"
-        >
-          <el-option
-            v-for="period in periods"
-            :value="period"
-            :label="period"
-            :key="`update-select-period-${period}`"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="區域" prop="area">
-        <el-select
-          class="formSelect"
-          size="large"
-          v-model="newData.area"
-          placeholder="請選擇或輸入區域"
-        >
-          <el-option
-            v-for="area in areas"
-            :value="area"
-            :label="area"
-            :key="`update-select-area-${area}`"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="GHP條文" prop="regulations">
-        <el-select
-          class="formSelect"
-          size="large"
-          v-model="newData.regulations"
-          multiple
-          placeholder="請選擇GHP條文"
-        >
-          <el-option
-            v-for="regulation in regulations"
-            :value="regulation.id"
-            :label="regulation.code"
-            :key="`update-select-regulation-${regulation.id}`"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="訪視表條文" prop="visitingForms">
-        <el-select
-          class="formSelect"
-          size="large"
-          v-model="newData.visitingForms"
-          multiple
-          placeholder="請選擇訪視表條文"
-        >
-          <el-option
-            v-for="visitingForm in visitingForms"
-            :value="visitingForm.id"
-            :label="visitingForm.code"
-            :key="`update-select-visitingForm-${visitingForm.id}`"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="需填資料" prop="needCheckValue">
-        <el-radio-group v-model="newData.needCheckValue">
-          <el-radio :label="true">需要</el-radio>
-          <el-radio :label="false">不需要</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="每日衛生管理日誌" prop="needDaily">
-        <el-radio-group v-model="newData.needDaily">
-          <el-radio :label="true">列入</el-radio>
-          <el-radio :label="false">不列入</el-radio>
-        </el-radio-group>
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button
-          type="danger"
-          text
-          size="large"
-          class="cancel-button"
-          @click.prevent="closeDialog"
-          >取消
-        </el-button>
-        <el-button
-          type="primary"
-          size="large"
-          @click.prevent="() => updateItem(formRef)"
-          >送出
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
+        </el-form-item>
+        <el-form-item label="週期" prop="period">
+          <el-select
+            class="formSelect"
+            size="large"
+            v-model="newData.period"
+            placeholder="請選擇或輸入週期"
+          >
+            <el-option
+              v-for="period in periods"
+              :value="period"
+              :label="period"
+              :key="`update-select-period-${period}`"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="區域" prop="area">
+          <el-select
+            class="formSelect"
+            size="large"
+            v-model="newData.area"
+            placeholder="請選擇或輸入區域"
+          >
+            <el-option
+              v-for="area in areas"
+              :value="area"
+              :label="area"
+              :key="`update-select-area-${area}`"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="GHP條文" prop="regulations">
+          <el-select
+            class="formSelect"
+            size="large"
+            v-model="newData.regulations"
+            multiple
+            placeholder="請選擇GHP條文"
+          >
+            <el-option
+              v-for="regulation in regulations"
+              :value="regulation.id"
+              :label="regulation.code"
+              :key="`update-select-regulation-${regulation.id}`"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="訪視表條文" prop="visitingForms">
+          <el-select
+            class="formSelect"
+            size="large"
+            v-model="newData.visitingForms"
+            multiple
+            placeholder="請選擇訪視表條文"
+          >
+            <el-option
+              v-for="visitingForm in visitingForms"
+              :value="visitingForm.id"
+              :label="visitingForm.code"
+              :key="`update-select-visitingForm-${visitingForm.id}`"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="需填資料" prop="needCheckValue">
+          <el-radio-group v-model="newData.needCheckValue">
+            <el-radio :label="true">需要</el-radio>
+            <el-radio :label="false">不需要</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="每日衛生管理日誌" prop="needDaily">
+          <el-radio-group v-model="newData.needDaily">
+            <el-radio :label="true">列入</el-radio>
+            <el-radio :label="false">不列入</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button
+            type="danger"
+            text
+            size="large"
+            class="cancel-button"
+            @click.prevent="closeDialog"
+            >取消
+          </el-button>
+          <el-button
+            type="primary"
+            size="large"
+            @click.prevent="() => updateItem(formRef)"
+            >送出
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script setup>
