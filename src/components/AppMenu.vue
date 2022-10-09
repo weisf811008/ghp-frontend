@@ -2,7 +2,7 @@
   <el-menu
     class="menu"
     :default-active="currentIndex"
-    :collapse="isCollapse"
+    :collapse="!isMobile && isCollapse"
     :unique-opened="true"
     @select="setCurrentIndex"
     router
@@ -85,23 +85,20 @@
     <div class="arrow">
       <el-button
         class="arrowButton"
-        v-show="isCollapse"
+        v-show="!isMobile && isCollapse"
         icon="DArrowRight"
-        @click="() => setIsCollapse(false)"
+        @click.prevent="() => setIsCollapse(false)"
       />
-    </div>
-    <div class="arrow">
       <el-button
         class="arrowButton"
-        v-show="!isCollapse"
+        v-show="!isMobile && !isCollapse"
         icon="DArrowLeft"
-        @click="() => setIsCollapse(true)"
+        @click.prevent="() => setIsCollapse(true)"
       />
     </div>
   </el-menu>
 </template>
 <script setup>
-import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '../stores/auth'
 import { useMenuStore } from '../stores/menu'
@@ -110,15 +107,11 @@ const authStore = useAuthStore()
 const { user } = storeToRefs(authStore)
 
 const menuStore = useMenuStore()
-const { currentIndex, isCollapse } = storeToRefs(menuStore)
+const { currentIndex, isCollapse, isMobile } = storeToRefs(menuStore)
 const { setCurrentIndex, setIsCollapse } = menuStore
 
 const isValid = (role) => {
   return user.value?.roles ? user.value.roles[0].role === role : false
-}
-
-window.onresize = () => {
-  setIsCollapse(document.body.offsetWidth < 975)
 }
 </script>
 
