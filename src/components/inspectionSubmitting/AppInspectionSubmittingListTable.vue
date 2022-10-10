@@ -128,23 +128,15 @@
                 />
               </div>
               <div>
-                <el-upload
-                  :file-list="
-                    inspectionDetailMap[scope.row.itemId].files.map((f) => ({
-                      name: f.originalname,
-                      url: `/api/inspections/files/${f.filename}`,
-                    }))
-                  "
-                  :on-success="(res) => handleUploaded(scope.row, res)"
-                  :on-preview="handlePictureCardPreview"
-                  :on-remove="
+                <AppPhotoWall
+                  :data="inspectionDetailMap[scope.row.itemId].files"
+                  :uploadable="true"
+                  @preview="handleFilePreview"
+                  @success="(res) => handleUploaded(scope.row, res)"
+                  @remove="
                     (file, files) => handleRemove(scope.row, file, files)
                   "
-                  action="/api/inspections/files"
-                  list-type="picture-card"
-                >
-                  <el-icon><Plus /></el-icon>
-                </el-upload>
+                />
               </div>
             </template>
           </el-table-column>
@@ -226,23 +218,15 @@
                 />
               </div>
               <div>
-                <el-upload
-                  :file-list="
-                    inspectionDetailMap[scope.row.itemId].files.map((f) => ({
-                      name: f.originalname,
-                      url: `/api/inspections/files/${f.filename}`,
-                    }))
-                  "
-                  :on-success="(res) => handleUploaded(scope.row, res)"
-                  :on-preview="handlePictureCardPreview"
-                  :on-remove="
+                <AppPhotoWall
+                  :data="inspectionDetailMap[scope.row.itemId].files"
+                  :uploadable="true"
+                  @preview="handleFilePreview"
+                  @success="(res) => handleUploaded(scope.row, res)"
+                  @remove="
                     (file, files) => handleRemove(scope.row, file, files)
                   "
-                  action="/api/inspections/files"
-                  list-type="picture-card"
-                >
-                  <el-icon><Plus /></el-icon>
-                </el-upload>
+                />
               </div>
             </template>
           </el-table-column>
@@ -289,20 +273,10 @@
         </div>
       </div>
     </el-form>
-    <el-dialog v-model="dialogImageVisible">
-      <img
-        v-if="isImage"
-        :src="dialogImageUrl"
-        alt="Preview Image"
-        style="width: 100%"
-      />
-      <img
-        v-else
-        src="../assets/undraw_text_files_au1q.svg"
-        alt="Preview Image"
-        style="width: 100%"
-      />
-    </el-dialog>
+    <AppPreviewDialog
+      v-model:show="isShowPreview"
+      :uploadFile="previewUploadFile"
+    />
   </div>
 </template>
 
@@ -435,19 +409,13 @@ const handleUploaded = (row, res) => {
   props.inspectionDetailMap[row.itemId].files.push(res)
 }
 
-const dialogImageUrl = ref('')
-const dialogImageVisible = ref(false)
+const previewUploadFile = ref({})
+const isShowPreview = ref(false)
 
-const handlePictureCardPreview = (uploadFile) => {
-  dialogImageUrl.value = uploadFile.url
-  dialogImageVisible.value = true
+const handleFilePreview = (uploadFile) => {
+  previewUploadFile.value = uploadFile
+  isShowPreview.value = true
 }
-
-const imgExt = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'svg']
-
-const isImage = computed(() =>
-  imgExt.includes(dialogImageUrl.value.split('.').pop().toLowerCase())
-)
 </script>
 
 <style lang="scss" scoped>

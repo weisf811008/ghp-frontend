@@ -1,65 +1,48 @@
 <template>
-  <el-card class="box-card" shadow="never">
-    <template #header>
-      <div class="card-header">
-        <h2>巡檢紀錄</h2>
-        <el-button size="large" @click.prevent="showCreateDialog" icon="Plus">
-          巡檢紀錄填報
-        </el-button>
-      </div>
-    </template>
-    <div>
-      <el-input v-model="search" placeholder="Search" size="large" />
-    </div>
-    <div class="hidden-sm-and-down">
-      <AppInspectionListTablePC
-        :tableData="tableData"
-        :isLoading="isLoading"
-        :page="page"
-        :pageSize="pageSize"
-        @update="showCheckDrawer"
-      />
-    </div>
-    <div class="mb hidden-md-only hidden-lg-only hidden-xl-only">
-      <AppInspectionListTableMB
-        :tableData="tableData"
-        :isLoading="isLoading"
-        :page="page"
-        :pageSize="pageSize"
-        @update="showCheckDrawer"
-      />
-    </div>
-    <AppPagination
-      v-model:page="page"
-      v-model:pageSize="pageSize"
-      :data="filterData"
-      @pageChange="handlePageChange"
-    />
-  </el-card>
   <div>
+    <el-card class="box-card" shadow="never">
+      <template #header>
+        <div class="card-header">
+          <h2>巡檢紀錄</h2>
+          <el-button size="large" @click.prevent="showCreateDialog" icon="Plus">
+            巡檢紀錄填報
+          </el-button>
+        </div>
+      </template>
+      <div>
+        <el-input v-model="search" placeholder="Search" size="large" />
+      </div>
+      <AppInspectionListTable
+        :tableData="tableData"
+        :isLoading="isLoading"
+        :page="page"
+        :pageSize="pageSize"
+        @update="showCheckDrawer"
+      />
+      <AppInspectionListCard
+        :tableData="tableData"
+        :isLoading="isLoading"
+        :page="page"
+        :pageSize="pageSize"
+        @update="showCheckDrawer"
+      />
+      <AppPagination
+        v-model:page="page"
+        v-model:pageSize="pageSize"
+        :data="filterData"
+        @pageChange="handlePageChange"
+      />
+    </el-card>
     <AppInspectionSelectDialog
       v-model:show="isShowCreateDialog"
       :forms="forms"
       :isLoading="isLoading"
       :rules="rules"
     />
-  </div>
-  <div class="hidden-sm-and-down">
-    <AppInspectionRecordPC
+    <AppInspectionDrawer
       v-model:show="isShowCheckDrawer"
       :isLoading="isLoading"
       :inspection="inspection"
-      :page="page"
-      :pageSize="pageSize"
-    />
-  </div>
-  <div class="mb hidden-md-only hidden-lg-only hidden-xl-only">
-    <AppInspectionRecordMB
-      v-model:show="isShowCheckDrawer"
-      :isLoading="isLoading"
-      :inspection="inspection"
-      :page="page"
-      :pageSize="pageSize"
     />
   </div>
 </template>
@@ -69,11 +52,6 @@ import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useFormStore } from '../stores/form'
 import { useInspectionStore } from '../stores/inspection'
-import AppInspectionListTablePC from '../components/inspection/AppInspectionListTablePC.vue'
-import AppInspectionListTableMB from '../components/inspection/AppInspectionListTableMB.vue'
-import AppInspectionSelectDialog from '../components/inspection/AppInspectionSelectDialog.vue'
-import AppInspectionRecordPC from '../components/inspection/AppInspectionRecordPC.vue'
-import AppInspectionRecordMB from '../components/inspection/AppInspectionRecordMB.vue'
 
 const formStore = useFormStore()
 const { forms } = storeToRefs(formStore)
