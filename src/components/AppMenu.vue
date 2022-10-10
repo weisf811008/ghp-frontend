@@ -8,7 +8,7 @@
     router
   >
     <el-menu-item index="/home">
-      <el-icon><HomeFilled /></el-icon>
+      <el-icon><House /></el-icon>
       <template #title>首頁</template>
     </el-menu-item>
     <el-sub-menu index="1" v-if="isValid('學校管理員')">
@@ -26,19 +26,26 @@
       </el-menu-item-group>
     </el-sub-menu>
     <el-menu-item index="/forms" v-if="isValid('學校管理員')">
-      <el-icon><Document /></el-icon>
+      <el-icon><Files /></el-icon>
       <template #title>巡檢目錄</template>
     </el-menu-item>
     <el-menu-item
       index="/inspection"
       v-if="isValid('學校管理員') || isValid('巡檢人員')"
     >
-      <el-icon><List /></el-icon>
+      <el-icon><Document /></el-icon>
       <template #title>巡檢紀錄</template>
+    </el-menu-item>
+    <el-menu-item
+      index="/dashboard"
+      v-if="isValid('學校管理員') || isValid('巡檢人員')"
+    >
+      <el-icon><DataLine /></el-icon>
+      <template #title>統計圖表</template>
     </el-menu-item>
     <el-sub-menu index="2" v-if="isValid('學校管理員')">
       <template #title>
-        <el-icon><Histogram /></el-icon>
+        <el-icon><Reading /></el-icon>
         <span>報表管理</span>
       </template>
       <el-menu-item-group>

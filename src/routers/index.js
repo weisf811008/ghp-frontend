@@ -60,6 +60,11 @@ const router = createRouter({
     //   component: () => import('../views/PageInspectionCorrecting.vue'),
     // },
     {
+      path: '/dashboard',
+      name: 'Dashboard',
+      component: () => import('../views/PageDashboard.vue'),
+    },
+    {
       path: '/reports/daily',
       name: 'ReportsDaily',
       component: () => import('../views/PageReportsDaily.vue'),
