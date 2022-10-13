@@ -73,13 +73,4 @@ const showCheckDrawer = (id) => {
 }
 </script>
 
-<style lang="scss" scoped>
-.mb-card {
-  margin: 10px 0;
-}
-.mb-button {
-  width: 100%;
-}
-</style>
-
 <style lang="scss" scoped></style>
