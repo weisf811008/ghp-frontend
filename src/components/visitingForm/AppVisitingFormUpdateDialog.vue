@@ -11,9 +11,6 @@
         status-icon
         hide-required-asterisk
       >
-        <el-form-item label="編號" prop="code">
-          {{ newData.code }}
-        </el-form-item>
         <el-form-item label="類別" prop="class">
           <el-select
             class="formSelect"
@@ -23,6 +20,9 @@
           >
             <el-option label="衛生訪視內容" value="衛生訪視內容" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="編號" prop="code">
+          <el-input v-model="newData.code" placeholder="請輸入編號" />
         </el-form-item>
         <el-form-item label="訪視項目" prop="description">
           <el-input
@@ -97,9 +97,9 @@ const newData = ref({
 
 const handleOpenDialog = () => {
   newData.value = {
-    code: props.data?.code,
-    class: props.data?.class,
-    description: props.data?.description,
+    code: props.data.code,
+    class: props.data.class,
+    description: props.data.description,
   }
   formRef.value.resetFields()
   formRef.value.clearValidate()
