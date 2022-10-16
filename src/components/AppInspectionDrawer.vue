@@ -4,7 +4,7 @@
     title="查看巡檢紀錄"
     :size="isMobile ? '100%' : '80%'"
   >
-    <el-descriptions border :column="isMobile ? 1 : 2">
+    <el-descriptions border :column="isMobile ? 1 : 2" class="form-header">
       <el-descriptions-item label="表單名稱">
         {{ inspection.title }}
       </el-descriptions-item>
@@ -94,4 +94,8 @@ const handleFilePreivew = (uploadFile) => {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.form-header {
+  margin-bottom: 10px;
+}
+</style>
