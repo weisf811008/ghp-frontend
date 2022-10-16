@@ -50,7 +50,7 @@ const { getForms, getFormById, createForm, updateForm, deleteForm } = formStore
 const itemStore = useItemStore()
 const { getItems, getTransferList } = itemStore
 
-const form = ref()
+const form = ref({})
 const isShowCreateDrawer = ref(false)
 const isShowUpdateDrawer = ref(false)
 
