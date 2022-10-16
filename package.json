@@ -11,7 +11,6 @@
     "@element-plus/icons-vue": "^2.0.6",
     "axios": "^0.27.2",
     "chart.js": "^3.9.1",
-    "chartjs-plugin-autocolors": "^0.0.7",
     "date-fns": "^2.29.1",
     "element-plus": "^2.2.16",
     "pinia": "^2.0.14",
