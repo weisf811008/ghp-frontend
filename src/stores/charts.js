@@ -56,6 +56,7 @@ export const useChartStore = defineStore(resource, () => {
   }
 
   return {
+    isLoading,
     getAbnormalCategories,
     getAbnormalItems,
     getAbnormalGhp,

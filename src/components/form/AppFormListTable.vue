@@ -7,8 +7,8 @@
           {{ scope.$index + (page - 1) * pageSize + 1 }}
         </template>
       </el-table-column>
-      <el-table-column label="巡檢表單名稱" prop="title" width="200" />
-      <el-table-column label="備註" prop="remarks" />
+      <el-table-column label="巡檢表單名稱" prop="title" />
+      <el-table-column label="備註" prop="remarks" width="200" />
       <el-table-column label="操作" align="center" width="220">
         <template #default="scope">
           <el-button

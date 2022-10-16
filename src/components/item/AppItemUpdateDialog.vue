@@ -11,9 +11,6 @@
         status-icon
         hide-required-asterisk
       >
-        <el-form-item label="編號" prop="no">
-          {{ newData.no }}
-        </el-form-item>
         <el-form-item label="檢核大項" prop="categoryId">
           <el-select
             class="formSelect"
@@ -28,6 +25,9 @@
               :key="`select-category-${category.id}`"
             />
           </el-select>
+        </el-form-item>
+        <el-form-item label="編號" prop="no">
+          <el-input v-model="newData.no" placeholder="請輸入編號" />
         </el-form-item>
         <el-form-item label="檢核細項" prop="item">
           <el-input
