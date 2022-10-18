@@ -90,7 +90,6 @@
                   <el-radio-button
                     label="pass"
                     value="pass"
-                    class="inspect-status"
                     data-ghp-inspection-type="pass"
                   >
                     合格
@@ -98,7 +97,6 @@
                   <el-radio-button
                     label="fail"
                     value="fail"
-                    class="inspect-status"
                     data-ghp-inspection-type="fail"
                   >
                     不合格
@@ -106,7 +104,6 @@
                   <el-radio-button
                     label="others"
                     value="others"
-                    class="inspect-status"
                     data-ghp-inspection-type="others"
                   >
                     其他
