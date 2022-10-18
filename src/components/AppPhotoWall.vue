@@ -79,7 +79,6 @@ const handleSuccess = (result) => {
 }
 
 const handleRemove = (file, files) => {
-  console.debug('on remove in photo wall')
   emits('remove', file, files)
 }
 </script>
