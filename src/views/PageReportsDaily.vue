@@ -11,6 +11,7 @@
           <AppDailyDownloadButton
             :dates="dates"
             :reports="reports"
+            :abnormalRows="abnormalRows"
             :statusMap="statusMap"
           />
         </div>
@@ -49,16 +50,18 @@ onMounted(() => {
 })
 
 const reports = ref([])
+const abnormalRows = ref([])
 
 const today = startOfDay(new Date())
 const dates = ref([subDays(today, 5), today])
 
 const getReports = async () => {
-  reports.value = await getReportDaily(
+  const res = await getReportDaily(
     dates.value[0].toISOString(),
     dates.value[1].toISOString()
   )
-  reports.value.sort((a, b) => (a.no > b.no ? 1 : -1))
+  reports.value = res.rows.sort((a, b) => (a.no > b.no ? 1 : -1))
+  abnormalRows.value = res.abnormalRows.sort((a, b) => (a.no > b.no ? 1 : -1))
 }
 
 const statusMap = {

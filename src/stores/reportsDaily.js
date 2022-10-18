@@ -18,7 +18,10 @@ export const useReportDailyStore = defineStore(resource, () => {
           end,
         },
       })
-      return res.data
+      return {
+        rows: res.data.rows,
+        abnormalRows: res.data.abnormalRows,
+      }
     } catch (e) {
       throw e
     } finally {
