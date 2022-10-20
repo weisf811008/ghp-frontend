@@ -10,7 +10,7 @@
 </template>
 <script setup>
 import * as XLSX from 'xlsx'
-import { addDays, format, differenceInDays } from 'date-fns'
+import { addDays, format, differenceInDays, isAfter } from 'date-fns'
 
 const props = defineProps({
   dates: {
@@ -19,6 +19,11 @@ const props = defineProps({
   },
   reports: {
     type: Array,
+    default: [],
+  },
+  abnormalRows: {
+    type: Array,
+    default: [],
   },
   statusMap: {
     type: Object,
@@ -33,6 +38,9 @@ const handleDownload = () => {
     format(props.dates[0], formatDate) +
     '~' +
     format(props.dates[1], formatDate)
+
+  const reportsLength = props.reports.length
+  const reportsAndAbnormalLength = reportsLength + props.abnormalRows.length
 
   const diff =
     differenceInDays(new Date(props.dates[1]), new Date(props.dates[0])) + 1
@@ -52,6 +60,7 @@ const handleDownload = () => {
       '文件編號',
       '',
       'DCES01',
+      '',
     ],
     [
       '制定單位',
@@ -64,21 +73,25 @@ const handleDownload = () => {
       '版次',
       '',
       '1.0',
+      '',
     ],
     [''],
     [
       '項次',
       '檢核大項',
+      '編號',
       '檢核細項',
       '',
       ...dateArr.map((d) => format(d, 'MM/dd')),
       '備註',
     ],
-    ...props.reports.map(({ category, item, ...rest }, i) => {
+    ...props.reports.map(({ no, category, item, ...rest }, i) => {
       return [
         i + 1,
         category,
+        no,
         item,
+        '',
         '',
         ...dateArr.map((d) => {
           const dateStr = format(d, 'yyyy-MM-dd')
@@ -86,7 +99,40 @@ const handleDownload = () => {
         }),
       ]
     }),
-    ['衛生管理人員', '', '', '營養師', '', '', '', '單位主管', '', ''],
+    [''],
+    [''],
+    [
+      '項次',
+      '日期',
+      '檢核大項',
+      '編號',
+      '異常細項',
+      '異常說明',
+      '',
+      '',
+      '',
+      '',
+      '',
+    ],
+
+    ...props.abnormalRows
+      .slice(0)
+      .sort((a, b) => (isAfter(new Date(a.date), new Date(b.date)) ? 1 : -1))
+      .map((row, i) => [
+        i + 1,
+        row.date,
+        row.category,
+        row.no,
+        row.item,
+        row.remarks,
+        '',
+        '',
+        '',
+        '',
+        '',
+      ]),
+
+    ['衛生管理人員', '', '', '營養師', '', '單位主管', '', '', '', '', ''],
   ])
 
   ws['!merges'] = [
@@ -99,31 +145,40 @@ const handleDownload = () => {
     { s: { c: 9, r: 1 }, e: { c: 10, r: 1 } },
     // empty row
     { s: { c: 0, r: 2 }, e: { c: 10, r: 2 } },
-    // header rows
-    { s: { c: 2, r: 3 }, e: { c: 3, r: 3 } },
-    // data rows
-    ...Array(props.reports.length)
-      .fill()
-      .map((v, i) => ({
-        s: { c: 2, r: 4 + i },
-        e: { c: 3, r: 4 + i },
-      })),
+    // header
+    { s: { c: 3, r: 3 }, e: { c: 4, r: 3 } },
+    // reports row
+    ...props.reports.map((v, i) => ({
+      s: { c: 3, r: 3 + i + 1 },
+      e: { c: 4, r: 3 + i + 1 },
+    })),
+    // abnormal row header
+
+    {
+      s: { c: 5, r: 6 + reportsLength },
+      e: { c: 10, r: 6 + reportsLength },
+    },
+    ...props.abnormalRows.map((v, i) => ({
+      s: { c: 5, r: 6 + reportsLength + i + 1 },
+      e: { c: 10, r: 6 + reportsLength + i + 1 },
+    })),
     //footer row
     {
-      s: { c: 0, r: 4 + props.reports.length },
-      e: { c: 2, r: 4 + props.reports.length },
+      s: { c: 0, r: 7 + reportsAndAbnormalLength },
+      e: { c: 2, r: 7 + reportsAndAbnormalLength },
     },
     {
-      s: { c: 3, r: 4 + props.reports.length },
-      e: { c: 6, r: 4 + props.reports.length },
+      s: { c: 3, r: 7 + reportsAndAbnormalLength },
+      e: { c: 4, r: 7 + reportsAndAbnormalLength },
     },
     {
-      s: { c: 7, r: 4 + props.reports.length },
-      e: { c: 10, r: 4 + props.reports.length },
+      s: { c: 5, r: 7 + reportsAndAbnormalLength },
+      e: { c: 10, r: 7 + reportsAndAbnormalLength },
     },
   ]
   ws['!cols'] = [
     { wch: 10 },
+    { wch: 16 },
     { wch: 16 },
     { wch: 10 },
     { wch: 36 },
@@ -133,7 +188,6 @@ const handleDownload = () => {
     { wch: 6 },
     { wch: 6 },
     { wch: 6 },
-    { wch: 10 },
   ]
 
   const wb = XLSX.utils.book_new()

@@ -10,42 +10,67 @@ export const useAdminSchoolStore = defineStore(resource, () => {
 
   //取得學校資料清單
   const getSchools = async () => {
-    isLoading.value = true
-    const res = await request.get(resource)
-    schools.value = res.data
-    isLoading.value = false
+    try {
+      isLoading.value = true
+      const res = await request.get(resource)
+      schools.value = res.data
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   //取得一筆學校資料
   const getSchoolById = async (id) => {
-    isLoading.value = true
-    const res = await request.get(`${resource}/${id}`)
-    isLoading.value = false
-    return res.data
+    try {
+      isLoading.value = true
+      const res = await request.get(`${resource}/${id}`)
+      return res.data
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   //新增一筆學校資料
   const createSchool = async (data) => {
-    isLoading.value = true
-    await request.post(resource, data)
-    isLoading.value = false
-    await getSchools()
+    try {
+      isLoading.value = true
+      await request.post(resource, data)
+      await getSchools()
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   //修改一筆學校資料
   const updateSchool = async (id, data) => {
-    isLoading.value = true
-    await request.put(`${resource}/${id}`, data)
-    isLoading.value = false
-    await getSchools()
+    try {
+      isLoading.value = true
+      await request.put(`${resource}/${id}`, data)
+      await getSchools()
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   //刪除一筆學校資料
   const deleteSchool = async (id) => {
-    isLoading.value = true
-    await request.delete(`${resource}/${id}`)
-    isLoading.value = false
-    await getSchools()
+    try {
+      isLoading.value = true
+      await request.delete(`${resource}/${id}`)
+      await getSchools()
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   return {

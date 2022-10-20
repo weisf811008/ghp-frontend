@@ -9,10 +9,15 @@ export const useAreaStore = defineStore(resource, () => {
 
   //取得區域標籤清單
   const getAreas = async () => {
-    isLoading.value = true
-    const res = await request.get(resource)
-    isLoading.value = false
-    return res.data
+    try {
+      isLoading.value = true
+      const res = await request.get(resource)
+      return res.data
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   return {

@@ -10,15 +10,23 @@ export const useReportDailyStore = defineStore(resource, () => {
 
   //取得指定日期區間內的巡檢日誌
   const getReportDaily = async (start, end) => {
-    isLoading.value = true
-    const res = await request.get(resource, {
-      params: {
-        start,
-        end,
-      },
-    })
-    isLoading.value = false
-    return res.data
+    try {
+      isLoading.value = true
+      const res = await request.get(resource, {
+        params: {
+          start,
+          end,
+        },
+      })
+      return {
+        rows: res.data.rows,
+        abnormalRows: res.data.abnormalRows,
+      }
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   return {

@@ -10,42 +10,67 @@ export const useFormStore = defineStore(resource, () => {
 
   //取得表單清單
   const getForms = async () => {
-    isLoading.value = true
-    const res = await request.get(resource)
-    forms.value = res.data
-    isLoading.value = false
+    try {
+      isLoading.value = true
+      const res = await request.get(resource)
+      forms.value = res.data
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   //取得表單
   const getFormById = async (id) => {
-    isLoading.value = true
-    const res = await request.get(`${resource}/${id}`)
-    isLoading.value = false
-    return res.data
+    try {
+      isLoading.value = true
+      const res = await request.get(`${resource}/${id}`)
+      return res.data
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   //新增一筆表單
   const createForm = async (data) => {
-    isLoading.value = true
-    await request.post(resource, data)
-    isLoading.value = false
-    await getForms()
+    try {
+      isLoading.value = true
+      await request.post(resource, data)
+      await getForms()
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   //修改一筆表單
   const updateForm = async (id, data) => {
-    isLoading.value = true
-    await request.put(`${resource}/${id}`, data)
-    isLoading.value = false
-    await getForms()
+    try {
+      isLoading.value = true
+      await request.put(`${resource}/${id}`, data)
+      await getForms()
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   //刪除一筆表單
   const deleteForm = async (id) => {
-    isLoading.value = true
-    await request.delete(`${resource}/${id}`)
-    isLoading.value = false
-    await getForms()
+    try {
+      isLoading.value = true
+      await request.delete(`${resource}/${id}`)
+      await getForms()
+    } catch (e) {
+      throw e
+    } finally {
+      isLoading.value = false
+    }
   }
 
   return {

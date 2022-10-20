@@ -8,7 +8,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
-      path: '/auth/login',
+      path: '/',
       name: 'Login',
       component: () => import('../views/PageLogin.vue'),
       meta: { layout: 'Login' },
@@ -117,7 +117,7 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       redirect: {
-        name: 'Home',
+        name: 'Login',
       },
     },
   ],
