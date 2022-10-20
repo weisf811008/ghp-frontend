@@ -1,280 +1,107 @@
 <template>
-  <div>
-    <el-form
-      ref="submitFormRef"
-      :model="newData"
-      v-loading="isLoading"
-      :rules="rules"
-      status-icon
-    >
-      <div class="subtitle">
-        <h3>{{ form.title }}</h3>
-        <el-form-item label="巡檢日期" prop="date">
-          <el-date-picker
-            v-model="newData.date"
-            type="date"
-            size="large"
-            value-format="YYYY-MM-DD"
-            :disabled-date="disabledDate"
-          />
-        </el-form-item>
-      </div>
-      <el-card
-        v-for="category in Object.keys(formDetailMap)"
-        :key="category"
-        class="mb-card-table"
-      >
-        <template #header>
-          <div class="inspect-header">
-            <div
-              class="category-name"
-              style="font-size: var(--el-font-size-large)"
-            >
-              {{ category }}
-            </div>
-            <div>
-              <el-button
-                class="check-all"
-                icon="Select"
-                size="large"
-                @click.prevent="inspectInBatch(category)"
-              >
-                一鍵檢核
-              </el-button>
-            </div>
-          </div>
-        </template>
-        <el-table
-          :data="formDetailMap[category]"
-          :row-class-name="setExpandRow"
-          class="tableRow hidden-sm-and-down"
-        >
-          <el-table-column label="項次" align="center" width="60">
-            <template #default="scope">
-              {{ scope.$index + 1 }}
-            </template>
-          </el-table-column>
-          <el-table-column label="檢核細項" prop="item" class="check-item" />
-          <el-table-column
-            label="測量值"
-            prop="checkValue"
-            align="center"
-            width="100"
-          >
-            <template #default="scope">
-              <el-input
-                v-model="inspectionDetailMap[scope.row.itemId].checkValue"
-                v-if="scope.row.needCheckValue"
-                class="check-value"
-                placeholder="測量值"
-                size="large"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="檢核結果"
-            prop="status"
-            align="center"
-            width="230"
-          >
-            <template #default="scope">
-              <el-form-item
-                :error="
-                  uncheckedItems.includes(scope.row.itemId) ? '必填' : null
-                "
-                @change="() => handleDetailChange(scope.row.itemId)"
-              >
-                <el-radio-group
-                  v-model="inspectionDetailMap[scope.row.itemId].status"
-                >
-                  <el-radio-button
-                    label="pass"
-                    value="pass"
-                    data-ghp-inspection-type="pass"
-                  >
-                    合格
-                  </el-radio-button>
-                  <el-radio-button
-                    label="fail"
-                    value="fail"
-                    data-ghp-inspection-type="fail"
-                  >
-                    不合格
-                  </el-radio-button>
-                  <el-radio-button
-                    label="others"
-                    value="others"
-                    data-ghp-inspection-type="others"
-                  >
-                    其他
-                  </el-radio-button>
-                </el-radio-group>
-              </el-form-item>
-            </template>
-          </el-table-column>
-          <el-table-column type="expand">
-            <template #default="scope">
-              <div>
-                <el-input
-                  v-model="inspectionDetailMap[scope.row.itemId].remarks"
-                  prop="remarks"
-                  :rows="3"
-                  type="textarea"
-                  :key="`remarks-${scope.row.itemId}`"
-                  placeholder="請填寫備註"
-                />
-              </div>
-              <div>
-                <AppPhotoWall
-                  :data="inspectionDetailMap[scope.row.itemId].files"
-                  :uploadable="true"
-                  @preview="handleFilePreview"
-                  @success="(res) => handleUploaded(scope.row, res)"
-                  @remove="
-                    (file, files) => handleRemove(scope.row, file, files)
-                  "
-                />
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-table
-          :ref="(el) => setMbTableRef(category, el)"
-          :data="formDetailMap[category]"
-          @expand-change="handleMbExpandChange"
-          class="hidden-md-and-up"
-          row-class-name="no-expand"
-        >
-          <el-table-column class="check-item">
-            <template #default="scope">
-              <p style="font-size: var(--el-font-size-large)">
-                {{ scope.$index + 1 }}. {{ scope.row.item }}
-              </p>
-              <el-input
-                v-model="inspectionDetailMap[scope.row.itemId].checkValue"
-                v-if="scope.row.needCheckValue"
-                class="check-value"
-                placeholder="測量值"
-                size="large"
-              />
-              <el-form-item
-                :error="
-                  uncheckedItems.includes(scope.row.itemId) ? '必填' : null
-                "
-                @change="() => handleDetailChange(scope.row.itemId)"
-              >
-                <el-radio-group
-                  v-model="inspectionDetailMap[scope.row.itemId].status"
-                  size="large"
-                >
-                  <el-radio-button
-                    label="pass"
-                    value="pass"
-                    data-ghp-inspection-type="pass"
-                  >
-                    合格
-                  </el-radio-button>
-                  <el-radio-button
-                    label="fail"
-                    value="fail"
-                    data-ghp-inspection-type="fail"
-                  >
-                    不合格
-                  </el-radio-button>
-                  <el-radio-button
-                    label="others"
-                    value="others"
-                    data-ghp-inspection-type="others"
-                  >
-                    其他
-                  </el-radio-button>
-                </el-radio-group>
-              </el-form-item>
-              <div class="remarks-button">
-                <el-button
-                  size="large"
-                  class="remarks-button"
-                  :icon="mbExpandButtonIcon[`${scope.row.itemId}`]"
-                  @click.prevent="() => expandMbRow(category, scope.row)"
-                >
-                  備註及附檔
-                </el-button>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column type="expand" width="1">
-            <template #default="scope">
-              <div>
-                <el-input
-                  v-model="inspectionDetailMap[scope.row.itemId].remarks"
-                  prop="remarks"
-                  :rows="3"
-                  type="textarea"
-                  :key="`remarks-${scope.row.itemId}`"
-                  placeholder="請填寫備註"
-                />
-              </div>
-              <div>
-                <AppPhotoWall
-                  :data="inspectionDetailMap[scope.row.itemId].files"
-                  :uploadable="true"
-                  @preview="handleFilePreview"
-                  @success="(res) => handleUploaded(scope.row, res)"
-                  @remove="
-                    (file, files) => handleRemove(scope.row, file, files)
-                  "
-                />
-              </div>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-card>
-      <div>
-        <el-input
-          v-model="newData.remarks"
-          rows="2"
-          type="textarea"
-          placeholder="請輸入備註"
+  <el-form
+    ref="submitFormRef"
+    :model="newData"
+    v-loading="isLoading"
+    :rules="rules"
+    status-icon
+  >
+    <div class="subtitle">
+      <h3>{{ form.title }}</h3>
+      <el-form-item label="巡檢日期" prop="date">
+        <AppInspectionDate
+          v-model:dateData="newData.date"
+          :disabled-date="disabledDate"
         />
-        <div class="footer">
-          <div class="due-date">
-            <el-form-item label="限期改善" prop="dueDate">
-              <el-date-picker
-                v-model="newData.dueDate"
-                type="date"
-                size="large"
-                value-format="YYYY-MM-DD"
-                :disabled-date="disabledDueDate"
-              />
-            </el-form-item>
+      </el-form-item>
+    </div>
+    <el-card
+      v-for="category in Object.keys(formDetailMap)"
+      :key="category"
+      class="mb-card-table"
+    >
+      <template #header>
+        <div class="inspect-header">
+          <div
+            class="category-name"
+            style="font-size: var(--el-font-size-large)"
+          >
+            {{ category }}
           </div>
-          <div class="footer-button">
+          <div>
             <el-button
-              type="danger"
+              class="check-all"
+              icon="Select"
               size="large"
-              text
-              class="cancel-button"
-              @click.prevent="closeInspectForm"
+              @click.prevent="inspectInBatch(category)"
             >
-              取消
-            </el-button>
-            <el-button
-              type="primary"
-              size="large"
-              class="submit-button"
-              @click.prevent="() => handleSubmitInspectForm(submitFormRef)"
-            >
-              送出
+              一鍵檢核
             </el-button>
           </div>
         </div>
+      </template>
+      <AppInspectionTable
+        :category="category"
+        :formDetailMap="formDetailMap"
+        :setExpandRow="setExpandRow"
+        :handleDetailChange="handleDetailChange"
+        :inspectionDetailMap="inspectionDetailMap"
+        :handleFilePreview="handleFilePreview"
+        :uncheckedItems="uncheckedItems"
+      />
+      <AppInspectionMbTable
+        :category="category"
+        :formDetailMap="formDetailMap"
+        :handleMbExpandChange="handleMbExpandChange"
+        :inspectionDetailMap="inspectionDetailMap"
+        :uncheckedItems="uncheckedItems"
+        :handleDetailChange="handleDetailChange"
+        :handleFilePreview="handleFilePreview"
+        :mbExpandButtonIcon="mbExpandButtonIcon"
+      />
+    </el-card>
+    <div>
+      <el-input
+        v-model="newData.remarks"
+        rows="2"
+        type="textarea"
+        placeholder="請輸入備註"
+      />
+      <div class="footer">
+        <div class="due-date">
+          <el-form-item label="限期改善" prop="dueDate">
+            <AppInspectionDate
+              v-model:dateData="newData.dueDate"
+              :disabled-date="disabledDueDate"
+            />
+          </el-form-item>
+        </div>
+        <div class="footer-button">
+          <el-button
+            type="danger"
+            size="large"
+            text
+            class="cancel-button"
+            @click.prevent="closeInspectForm"
+          >
+            取消
+          </el-button>
+          <el-button
+            type="primary"
+            size="large"
+            class="submit-button"
+            @click.prevent="() => handleSubmitInspectForm(submitFormRef)"
+          >
+            送出
+          </el-button>
+        </div>
       </div>
-    </el-form>
-    <AppPreviewDialog
-      v-model:show="isShowPreview"
-      :uploadFile="previewUploadFile"
-    />
-  </div>
+    </div>
+  </el-form>
+  <AppPreviewDialog
+    v-model:show="isShowPreview"
+    :uploadFile="previewUploadFile"
+  />
 </template>
 
 <script setup>
@@ -381,15 +208,6 @@ const disabledDueDate = (time) => {
   return time.getTime() < Date.now()
 }
 
-const mbTableRef = ref({})
-const expandMbRow = (category, row) => {
-  mbTableRef.value[category].toggleRowExpansion(row)
-}
-
-const setMbTableRef = (category, el) => {
-  mbTableRef.value[category] = el
-}
-
 const setExpandRow = ({ row, rowIndex }) => {
   const detail = props.inspectionDetailMap[row.itemId]
   const item = props.form.details.find((d) => d.itemId === row.itemId)
@@ -400,10 +218,6 @@ const handleRemove = (row, uploadFile, uploadFiles) => {
   props.inspectionDetailMap[row.itemId].files = props.inspectionDetailMap[
     row.itemId
   ].files.filter((p) => p.filename !== uploadFile.url.split('/').pop())
-}
-
-const handleUploaded = (row, res) => {
-  props.inspectionDetailMap[row.itemId].files.push(res)
 }
 
 const previewUploadFile = ref({})
@@ -430,12 +244,6 @@ const handleFilePreview = (uploadFile) => {
 
 .mb-card-table {
   margin-bottom: 6px;
-
-  .tableRow {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-  }
 }
 
 .footer {
@@ -512,29 +320,6 @@ const handleFilePreview = (uploadFile) => {
       }
     }
 
-    .check-item {
-      .check-value {
-        margin: 5px 0;
-      }
-    }
-
-    .el-radio-group {
-      width: 100%;
-      .el-radio-button {
-        width: 100%;
-        border: 0.1px solid rgb(220, 223, 230);
-        border-radius: 4px;
-        margin-top: 5px;
-        :deep(.el-radio-button__inner) {
-          width: 100%;
-        }
-      }
-    }
-
-    .remarks-button {
-      width: 100%;
-    }
-
     .footer {
       display: block;
     }
@@ -545,11 +330,9 @@ const handleFilePreview = (uploadFile) => {
 
     .footer-button {
       width: 100%;
-      .cancel-button {
-        background-color: #f0f2f5;
-      }
 
       .cancel-button {
+        background-color: #f0f2f5;
         width: 50%;
       }
 
