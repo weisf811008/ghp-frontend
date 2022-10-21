@@ -110,9 +110,14 @@ const router = createRouter({
       component: () => import('../views/PageSettingUsers.vue'),
     },
     {
-      path: '/history',
-      name: 'History',
-      component: () => import('../views/PageHistory.vue'),
+      path: '/admin/histories',
+      name: 'AdminHistories',
+      component: () => import('../views/PageAdminHistories.vue'),
+    },
+    {
+      path: '/histories',
+      name: 'Histories',
+      component: () => import('../views/PageHistories.vue'),
     },
     {
       path: '/:pathMatch(.*)*',
