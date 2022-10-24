@@ -21,7 +21,6 @@
       :isLoading="isLoading"
       :page="page"
       :pageSize="pageSize"
-      :getStatusDetail="getStatusDetail"
       @show="showCheckDrawer"
     />
     <AppPagination
