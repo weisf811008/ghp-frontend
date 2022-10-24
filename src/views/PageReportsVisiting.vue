@@ -21,7 +21,7 @@
       :isLoading="isLoading"
       :page="page"
       :pageSize="pageSize"
-      :getStatusDetail="getStatusDetail"
+      @show="showCheckDrawer"
     />
     <AppPagination
       v-model:page="page"
@@ -30,16 +30,25 @@
       @pageChange="handlePageChange"
     />
   </el-card>
+  <AppInspectionDrawer
+    v-model:show="isShowCheckDrawer"
+    :isLoading="isLoading"
+    :inspection="inspection"
+  />
 </template>
 <script setup>
 import { ref, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { subDays, startOfDay } from 'date-fns'
 import { useReportVisitingStore } from '../stores/reportsVisiting'
+import { useInspectionStore } from '../stores/inspection'
 
 const reportVisitingStore = useReportVisitingStore()
 const { isLoading } = storeToRefs(reportVisitingStore)
 const { getReportVisiting } = reportVisitingStore
+
+const inspectionStore = useInspectionStore()
+const { getInspection } = inspectionStore
 
 const dateRange = ref([])
 const today = startOfDay(new Date())
@@ -74,6 +83,16 @@ const tableData = ref([])
 
 const handlePageChange = (data) => {
   tableData.value = data
+}
+
+// inspection drawer
+const inspection = ref({})
+
+const isShowCheckDrawer = ref(false)
+
+const showCheckDrawer = async (id) => {
+  inspection.value = await getInspection(id)
+  isShowCheckDrawer.value = true
 }
 </script>
 
