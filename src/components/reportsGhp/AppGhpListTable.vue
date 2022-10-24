@@ -118,10 +118,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  getStatusDetail: {
-    type: Function,
-    required: true,
-  },
   page: {
     type: Number,
     default: 0,
