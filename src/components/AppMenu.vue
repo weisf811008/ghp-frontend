@@ -85,10 +85,14 @@
         </el-menu-item>
       </el-menu-item-group>
     </el-sub-menu>
-    <!-- <el-menu-item index="/history">
-        <el-icon><DocumentCopy /></el-icon>
-        <span>操作記錄</span>
-      </el-menu-item> -->
+    <el-menu-item index="/admin/histories" v-if="isValid('系統管理員')">
+      <el-icon><DocumentCopy /></el-icon>
+      <span>操作記錄</span>
+    </el-menu-item>
+    <el-menu-item index="/histories" v-if="isValid('學校管理員')">
+      <el-icon><DocumentCopy /></el-icon>
+      <span>操作記錄</span>
+    </el-menu-item>
     <div class="arrow">
       <el-button
         class="arrowButton"
