@@ -73,7 +73,7 @@ const filterData = computed(
       (data) =>
         !search.value ||
         data.title.includes(search.value) ||
-        data.remarks.includes(search.value)
+        data.remarks?.includes(search.value)
     ))
 )
 
