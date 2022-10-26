@@ -71,9 +71,10 @@ const filterData = computed(() =>
       props.schoolsMap[data.schoolId]?.includes(search.value) ||
       data.username?.includes(search.value) ||
       data.name?.includes(search.value) ||
-      data.message?.includes(search.value)
-    //   (data.timestamp.isValid
-    //     ? data.timestamp.toISOString().includes(search.value)
+      data.message?.includes(search.value) ||
+      format(parseISO(data.timestamp), 'yyyy-MM-dd HH:mm:ss').includes(
+        search.value
+      )
   )
 )
 
