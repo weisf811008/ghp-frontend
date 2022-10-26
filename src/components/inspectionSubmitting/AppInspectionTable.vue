@@ -106,12 +106,15 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
-  handleFilePreview: {
-    type: Function,
-  },
   uncheckedItems: {
     type: Array,
     required: true,
+  },
+  handleFilePreview: {
+    type: Function,
+  },
+  handleRemove: {
+    type: Function,
   },
 })
 

@@ -109,10 +109,13 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  handleDetailChange: {
+  handleFilePreview: {
     type: Function,
   },
-  handleFilePreview: {
+  handleRemove: {
+    type: Function,
+  },
+  handleDetailChange: {
     type: Function,
   },
   mbExpandButtonIcon: {

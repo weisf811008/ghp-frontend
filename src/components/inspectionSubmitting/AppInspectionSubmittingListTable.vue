@@ -46,6 +46,7 @@
         :setExpandRow="setExpandRow"
         :handleDetailChange="handleDetailChange"
         :inspectionDetailMap="inspectionDetailMap"
+        :handleRemove="handleRemove"
         :handleFilePreview="handleFilePreview"
         :uncheckedItems="uncheckedItems"
       />
@@ -55,8 +56,9 @@
         :handleMbExpandChange="handleMbExpandChange"
         :inspectionDetailMap="inspectionDetailMap"
         :uncheckedItems="uncheckedItems"
-        :handleDetailChange="handleDetailChange"
         :handleFilePreview="handleFilePreview"
+        :handleRemove="handleRemove"
+        :handleDetailChange="handleDetailChange"
         :mbExpandButtonIcon="mbExpandButtonIcon"
       />
     </el-card>
