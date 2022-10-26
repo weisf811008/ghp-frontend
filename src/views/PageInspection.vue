@@ -50,6 +50,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
+import { format, parseISO } from 'date-fns'
 import { useFormStore } from '../stores/form'
 import { useInspectionStore } from '../stores/inspection'
 
@@ -87,9 +88,12 @@ const filterData = computed(
     (tableData.value = inspections.value.filter(
       (data) =>
         !search.value ||
-        data.date.includes(search.value) ||
-        data.createdAt.includes(search.value) ||
-        data.title.includes(search.value)
+        format(parseISO(data.date), 'yyyy/MM/dd').includes(search.value) ||
+        format(parseISO(data.createdAt), 'yyyy/MM/dd HH:mm').includes(
+          search.value
+        ) ||
+        data.title.includes(search.value) ||
+        data.inspectedBy.name.includes(search.value)
     ))
 )
 
