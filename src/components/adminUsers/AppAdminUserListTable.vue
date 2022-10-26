@@ -108,8 +108,8 @@ const filterData = computed(
           data.roles.some((r) => r.role.includes(search.value)) ||
           data.name.includes(search.value) ||
           data.username.includes(search.value) ||
-          data.phone.includes(search.value) ||
-          data.email.includes(search.value))
+          data.phone?.includes(search.value) ||
+          data.email?.includes(search.value))
     ))
 )
 
