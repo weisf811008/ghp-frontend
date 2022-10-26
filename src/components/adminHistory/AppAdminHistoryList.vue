@@ -26,7 +26,7 @@
         align="center"
         width="200"
       />
-      <el-table-column label="修改日期/時間" align="center" width="400">
+      <el-table-column label="修改日期/時間" align="center" width="200">
         <template #default="scope">
           {{ format(parseISO(scope.row.timestamp), 'yyyy-MM-dd HH:mm:ss') }}
         </template>
