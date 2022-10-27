@@ -122,7 +122,7 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       redirect: {
-        name: 'Login',
+        name: 'Home',
       },
     },
   ],
