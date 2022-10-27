@@ -6,13 +6,13 @@
       </div>
     </template>
     <AppInspectionSubmittingListTable
+      v-model:newData="newData"
+      v-model:inspectionDetailMap="inspectionDetailMap"
       :form="form"
       :isLoading="isLoading"
       :rules="rules"
-      :newData="newData"
       :create="createInspection"
       :formDetailMap="formDetailMap"
-      :inspectionDetailMap="inspectionDetailMap"
       :mbExpandButtonIcon="mbExpandButtonIcon"
       :handleMbExpandChange="handleMbExpandChange"
     />
