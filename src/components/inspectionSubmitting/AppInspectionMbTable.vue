@@ -12,7 +12,10 @@
           {{ scope.$index + 1 }}. {{ scope.row.item }}
         </p>
         <el-input
-          v-model="inspectionDetailMap[scope.row.itemId].checkValue"
+          :model-value="inspectionDetailMap[scope.row.itemId].checkValue"
+          @input="
+            (val) => handleInspChange('checkValue', scope.row.itemId, val)
+          "
           v-if="scope.row.needCheckValue"
           class="check-value"
           placeholder="測量值"
@@ -23,7 +26,8 @@
           @change="() => handleDetailChange(scope.row.itemId)"
         >
           <el-radio-group
-            v-model="inspectionDetailMap[scope.row.itemId].status"
+            :model-value="inspectionDetailMap[scope.row.itemId].status"
+            @change="(val) => handleInspChange('status', scope.row.itemId, val)"
             size="large"
           >
             <el-radio-button
@@ -65,7 +69,8 @@
       <template #default="scope">
         <div>
           <el-input
-            v-model="inspectionDetailMap[scope.row.itemId].remarks"
+            :model-value="inspectionDetailMap[scope.row.itemId].remarks"
+            @input="(val) => handleInspChange('remarks', scope.row.itemId, val)"
             prop="remarks"
             :rows="3"
             type="textarea"
@@ -78,8 +83,8 @@
             :data="inspectionDetailMap[scope.row.itemId].files"
             :uploadable="true"
             @preview="handleFilePreview"
-            @success="(res) => handleUploaded(scope.row, res)"
-            @remove="(file, files) => handleRemove(scope.row, file, files)"
+            @success="(res) => handleFileUpload(scope.row.itemId, res)"
+            @remove="(file) => handleFileRemove(scope.row.itemId, file)"
           />
         </div>
       </template>
@@ -90,6 +95,10 @@
 <script setup>
 import { ref } from 'vue'
 const props = defineProps({
+  inspectionDetailMap: {
+    type: Object,
+    default: () => ({}),
+  },
   category: {
     type: String,
     required: true,
@@ -101,18 +110,20 @@ const props = defineProps({
   handleMbExpandChange: {
     type: Function,
   },
-  inspectionDetailMap: {
-    type: Object,
-    default: () => ({}),
+  handleInspChange: {
+    type: Function,
+  },
+  handleFileUpload: {
+    type: Function,
+  },
+  handleFileRemove: {
+    type: Function,
   },
   uncheckedItems: {
     type: Array,
     required: true,
   },
   handleFilePreview: {
-    type: Function,
-  },
-  handleRemove: {
     type: Function,
   },
   handleDetailChange: {
@@ -125,16 +136,13 @@ const props = defineProps({
 })
 
 const mbTableRef = ref({})
+
 const expandMbRow = (category, row) => {
   mbTableRef.value[category].toggleRowExpansion(row)
 }
 
 const setMbTableRef = (category, el) => {
   mbTableRef.value[category] = el
-}
-
-const handleUploaded = (row, res) => {
-  props.inspectionDetailMap[row.itemId].files.push(res)
 }
 </script>
 

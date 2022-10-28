@@ -1,7 +1,7 @@
 <template>
   <el-form
     ref="submitFormRef"
-    :model="newData"
+    :model="theNewData"
     v-loading="isLoading"
     :rules="rules"
     status-icon
@@ -10,8 +10,9 @@
       <h3>{{ form.title }}</h3>
       <el-form-item label="巡檢日期" prop="date">
         <AppInspectionDate
-          v-model:dateData="newData.date"
+          :dateData="theNewData.date"
           :disabled-date="disabledDate"
+          @update:dateData="(val) => handleNewDataUpdate('date', val)"
         />
       </el-form-item>
     </div>
@@ -33,7 +34,7 @@
               class="check-all"
               icon="Select"
               size="large"
-              @click.prevent="inspectInBatch(category)"
+              @click.prevent="() => inspectInBatch(category)"
             >
               一鍵檢核
             </el-button>
@@ -41,30 +42,35 @@
         </div>
       </template>
       <AppInspectionTable
+        :inspectionDetailMap="theInspMap"
         :category="category"
         :formDetailMap="formDetailMap"
         :setExpandRow="setExpandRow"
+        :handleInspChange="handleInspChange"
+        :handleFileUpload="handleFileUpload"
+        :handleFileRemove="handleFileRemove"
         :handleDetailChange="handleDetailChange"
-        :inspectionDetailMap="inspectionDetailMap"
-        :handleRemove="handleRemove"
         :handleFilePreview="handleFilePreview"
         :uncheckedItems="uncheckedItems"
       />
       <AppInspectionMbTable
+        :inspectionDetailMap="inspectionDetailMap"
         :category="category"
         :formDetailMap="formDetailMap"
         :handleMbExpandChange="handleMbExpandChange"
-        :inspectionDetailMap="inspectionDetailMap"
+        :handleInspChange="handleInspChange"
+        :handleFileUpload="handleFileUpload"
+        :handleFileRemove="handleFileRemove"
         :uncheckedItems="uncheckedItems"
         :handleFilePreview="handleFilePreview"
-        :handleRemove="handleRemove"
         :handleDetailChange="handleDetailChange"
         :mbExpandButtonIcon="mbExpandButtonIcon"
       />
     </el-card>
     <div>
       <el-input
-        v-model="newData.remarks"
+        :model-value="theNewData.remarks"
+        @input="(val) => handleNewDataUpdate('remarks', val)"
         rows="2"
         type="textarea"
         placeholder="請輸入備註"
@@ -73,8 +79,9 @@
         <div class="due-date">
           <el-form-item label="限期改善" prop="dueDate">
             <AppInspectionDate
-              v-model:dateData="newData.dueDate"
+              :dateData="theNewData.dueDate"
               :disabled-date="disabledDueDate"
+              @update:dateData="(val) => handleNewDataUpdate('dueDate', val)"
             />
           </el-form-item>
         </div>
@@ -108,8 +115,10 @@
 
 <script setup>
 import axios from 'axios'
+import merge from 'lodash/merge'
+import mergeWith from 'lodash/mergeWith'
 import { ref, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   form: {
@@ -148,19 +157,77 @@ const props = defineProps({
   },
 })
 
+const emits = defineEmits(['update:inspectionDetailMap', 'update:newData'])
+
 const router = useRouter()
 const submitFormRef = ref()
 
+const theInspMap = computed({
+  get: () => props.inspectionDetailMap,
+  set: (val) => emits('update:inspectionDetailMap', val),
+})
+
+const theNewData = computed({
+  get: () => props.newData,
+  set: (val) => emits('update:newData', val),
+})
+
 const inspectInBatch = (category) => {
-  props.formDetailMap[category].forEach((row) => {
-    if (!props.inspectionDetailMap[row.itemId].status) {
-      props.inspectionDetailMap[row.itemId].status = 'pass'
-    }
-  })
+  theInspMap.value = merge(
+    theInspMap.value,
+    props.formDetailMap[category].reduce((acc, cur) => {
+      if (!theInspMap.value[cur.itemId].status) {
+        acc[cur.itemId] = {
+          status: 'pass',
+        }
+      }
+      return acc
+    }, {})
+  )
 }
 
 const closeInspectForm = () => {
   router.push({ name: 'Inspection' })
+}
+
+const handleNewDataUpdate = (attr, val) => {
+  theNewData.value = merge(theNewData.value, {
+    [attr]: val,
+  })
+}
+
+const handleInspChange = (attr, itemId, val) => {
+  theInspMap.value = merge(theInspMap.value, {
+    [itemId]: {
+      [attr]: val,
+    },
+  })
+}
+
+const handleFileUpload = (itemId, res) => {
+  theInspMap.value = merge(theInspMap.value, {
+    [itemId]: {
+      files: theInspMap.value[itemId].files.concat(res),
+    },
+  })
+}
+
+const handleFileRemove = (itemId, file) => {
+  theInspMap.value = mergeWith(
+    theInspMap.value,
+    {
+      [itemId]: {
+        files: theInspMap.value[itemId].files.filter(
+          (f) => f.filename !== file.filename
+        ),
+      },
+    },
+    (obj, src) => {
+      if (Array.isArray(src)) {
+        return src
+      }
+    }
+  )
 }
 
 const handleDetailChange = (itemId) => {

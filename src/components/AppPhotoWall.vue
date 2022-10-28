@@ -62,6 +62,7 @@ const fileList = computed(() =>
           ? downloadUrl
           : textFilesSvgUrl,
       downloadUrl,
+      filename,
     }
   })
 )
