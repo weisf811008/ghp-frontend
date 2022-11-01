@@ -11,12 +11,12 @@
       <el-descriptions-item label="巡檢日期">
         {{ inspection.date && format(parseISO(inspection.date), 'yyyy/MM/dd') }}
       </el-descriptions-item>
-      <el-descriptions-item label="限期改善日期">
+      <!-- <el-descriptions-item label="限期改善日期">
         {{
           inspection.dueDate &&
           format(parseISO(inspection.dueDate), 'yyyy/MM/dd')
         }}
-      </el-descriptions-item>
+      </el-descriptions-item> -->
       <el-descriptions-item label="巡檢人員">
         {{ inspection.inspectedBy?.name }}
       </el-descriptions-item>
@@ -26,9 +26,9 @@
           format(parseISO(inspection.createdAt), 'yyyy/MM/dd HH:mm')
         }}
       </el-descriptions-item>
-      <el-descriptions-item label="備註">
+      <!-- <el-descriptions-item label="備註">
         {{ inspection.remarks }}
-      </el-descriptions-item>
+      </el-descriptions-item> -->
     </el-descriptions>
     <AppInspectionDetailTable
       :data="inspection.details"
