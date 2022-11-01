@@ -92,7 +92,6 @@ const handleDownload = () => {
         no,
         item,
         '',
-        '',
         ...dateArr.map((d) => {
           const dateStr = format(d, 'yyyy-MM-dd')
           return props.statusMap[rest[dateStr]] || ''
