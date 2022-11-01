@@ -18,8 +18,8 @@
       </template>
       <el-menu-item-group>
         <el-menu-item index="/settings/regulations">GHP條文管理</el-menu-item>
-        <el-menu-item index="/settings/visitingForms"
-          >訪視表條文管理
+        <el-menu-item index="/settings/visitingForms">
+          訪視表條文管理
         </el-menu-item>
         <el-menu-item index="/settings/categories"> 檢核大項主檔 </el-menu-item>
         <el-menu-item index="/settings/items"> 檢核細項主檔 </el-menu-item>
@@ -36,14 +36,24 @@
       <el-icon><Document /></el-icon>
       <template #title>巡檢紀錄</template>
     </el-menu-item>
-    <el-menu-item
-      index="/dashboard"
-      v-if="isValid('學校管理員') || isValid('巡檢人員')"
-    >
-      <el-icon><DataLine /></el-icon>
-      <template #title>統計圖表</template>
-    </el-menu-item>
-    <el-sub-menu index="2" v-if="isValid('學校管理員')">
+    <el-sub-menu index="2" v-if="isValid('學校管理員') || isValid('巡檢人員')">
+      <template #title>
+        <el-icon><DataLine /></el-icon>
+        <span>統計圖表</span>
+      </template>
+      <el-menu-item-group>
+        <el-menu-item index="/dashboard/abnormalCategories">
+          檢核大項缺失次數
+        </el-menu-item>
+        <el-menu-item index="/dashboard/normalCategories">
+          檢核大項合格次數
+        </el-menu-item>
+        <el-menu-item index="/dashboard/abnormalItems">
+          檢核細項十大缺失次數
+        </el-menu-item>
+      </el-menu-item-group>
+    </el-sub-menu>
+    <el-sub-menu index="3" v-if="isValid('學校管理員')">
       <template #title>
         <el-icon><Reading /></el-icon>
         <span>報表管理</span>
@@ -60,7 +70,7 @@
       </el-menu-item-group>
     </el-sub-menu>
     <el-sub-menu
-      index="3"
+      index="4"
       v-if="isValid('系統管理員') || isValid('學校管理員')"
     >
       <template #title>

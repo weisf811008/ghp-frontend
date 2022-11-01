@@ -60,9 +60,19 @@ const router = createRouter({
     //   component: () => import('../views/PageInspectionCorrecting.vue'),
     // },
     {
-      path: '/dashboard',
-      name: 'Dashboard',
-      component: () => import('../views/PageDashboard.vue'),
+      path: '/dashboard/abnormalCategories',
+      name: 'DashboardAbnormalCategories',
+      component: () => import('../views/PageDashboardAbnormalCategories.vue'),
+    },
+    {
+      path: '/dashboard/normalCategories',
+      name: 'DashboardNormalCategories',
+      component: () => import('../views/PageDashboardNormalCategories.vue'),
+    },
+    {
+      path: '/dashboard/abnormalItems',
+      name: 'DashboardAbnormalItems',
+      component: () => import('../views/PageDashboardAbnormalItems.vue'),
     },
     {
       path: '/reports/daily',
