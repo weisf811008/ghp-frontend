@@ -68,15 +68,15 @@
       />
     </el-card>
     <div>
-      <el-input
+      <!-- <el-input
         :model-value="theNewData.remarks"
         @input="(val) => handleNewDataUpdate('remarks', val)"
         rows="2"
         type="textarea"
         placeholder="請輸入備註"
-      />
+      /> -->
       <div class="footer">
-        <div class="due-date">
+        <!-- <div class="due-date">
           <el-form-item label="限期改善" prop="dueDate">
             <AppInspectionDate
               :dateData="theNewData.dueDate"
@@ -84,7 +84,7 @@
               @update:dateData="(val) => handleNewDataUpdate('dueDate', val)"
             />
           </el-form-item>
-        </div>
+        </div> -->
         <div class="footer-button">
           <el-button
             type="danger"
@@ -320,11 +320,11 @@ const handleFilePreview = (uploadFile) => {
   justify-content: flex-end;
   align-items: center;
   text-align: center;
-  margin-top: 20px;
+  // margin-top: 20px;
 
   .footer-button {
     display: flex;
-    margin-top: -20px;
+    // margin-top: -20px;
 
     .cancel-button {
       display: block;
