@@ -3,7 +3,16 @@
     <template #header>
       <div class="card-header">
         <h2>檢核細項十大缺失</h2>
-        <AppSelectDate v-model:dateRange="dates" :handleChange="handleChange" />
+        <span class="block">
+          <span class="selectDate">請選擇月份</span>
+          <el-date-picker
+            v-model="month"
+            type="month"
+            placeholder="請選擇月份"
+            size="large"
+            @change="handleChange"
+          />
+        </span>
       </div>
     </template>
     <div>
@@ -18,7 +27,7 @@
 </template>
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { subDays, startOfDay } from 'date-fns'
+import { startOfMonth, endOfMonth, format } from 'date-fns'
 import { storeToRefs } from 'pinia'
 import { useChartStore } from '../stores/charts'
 import AppBarChart from '../components/charts/AppBarChart.vue'
@@ -28,16 +37,16 @@ const { isLoading } = storeToRefs(chartStore)
 const { getAbnormalItems } = chartStore
 
 //date picker
-const dateRange = ref([])
-const today = startOfDay(new Date())
-const dates = ref([subDays(today, 13), today])
+const month = ref(format(new Date(), 'yyyy-MM'))
 
 const abnormalItemsIsEmpty = ref(false)
-
 const abnormalItems = ref({})
 
 const getAbnormalItemsData = async () => {
-  abnormalItems.value = await getAbnormalItems(dates.value[0], dates.value[1])
+  const date = new Date(month.value)
+  const startDate = startOfMonth(date)
+  const endDate = endOfMonth(date)
+  abnormalItems.value = await getAbnormalItems(startDate, endDate)
 }
 
 onMounted(async () => {
@@ -59,4 +68,14 @@ watch(
   }
 )
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.block {
+  align-items: center;
+  color: rgb(96, 98, 102);
+
+  .selectDate {
+    margin-right: 10px;
+    font-size: 14px;
+  }
+}
+</style>
