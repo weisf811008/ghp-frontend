@@ -36,7 +36,23 @@
       <el-icon><Document /></el-icon>
       <template #title>巡檢紀錄</template>
     </el-menu-item>
-    <el-sub-menu index="2" v-if="isValid('學校管理員') || isValid('巡檢人員')">
+    <el-sub-menu index="2" v-if="isValid('學校管理員')">
+      <template #title>
+        <el-icon><Reading /></el-icon>
+        <span>報表管理</span>
+      </template>
+      <el-menu-item-group>
+        <el-menu-item index="/reports/daily">每日衛生管理日誌</el-menu-item>
+        <el-menu-item index="/reports/prodtemp">成品中心溫度報表</el-menu-item>
+        <el-menu-item index="/reports/tnh">
+          庫房、食材、檢體保存溫濕度報表
+        </el-menu-item>
+        <el-menu-item index="/reports/tableware">餐具檢驗報表</el-menu-item>
+        <el-menu-item index="/reports/ghp">GHP報表</el-menu-item>
+        <el-menu-item index="/reports/visiting">訪視表報表</el-menu-item>
+      </el-menu-item-group>
+    </el-sub-menu>
+    <el-sub-menu index="3" v-if="isValid('學校管理員') || isValid('巡檢人員')">
       <template #title>
         <el-icon><DataLine /></el-icon>
         <span>統計圖表</span>
@@ -53,22 +69,7 @@
         </el-menu-item>
       </el-menu-item-group>
     </el-sub-menu>
-    <el-sub-menu index="3" v-if="isValid('學校管理員')">
-      <template #title>
-        <el-icon><Reading /></el-icon>
-        <span>報表管理</span>
-      </template>
-      <el-menu-item-group>
-        <el-menu-item index="/reports/daily">每日衛生管理日誌</el-menu-item>
-        <el-menu-item index="/reports/prodtemp">成品中心溫度報表</el-menu-item>
-        <el-menu-item index="/reports/tnh">
-          庫房、食材、檢體保存溫濕度報表
-        </el-menu-item>
-        <el-menu-item index="/reports/tableware">餐具檢驗報表</el-menu-item>
-        <el-menu-item index="/reports/ghp">GHP報表</el-menu-item>
-        <el-menu-item index="/reports/visiting">訪視表報表</el-menu-item>
-      </el-menu-item-group>
-    </el-sub-menu>
+
     <el-sub-menu
       index="4"
       v-if="isValid('系統管理員') || isValid('學校管理員')"
