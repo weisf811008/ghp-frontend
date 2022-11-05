@@ -82,7 +82,15 @@ export default defineComponent({
         }
       }
     )
-    const chartOptions = { responsive: true }
+    const chartOptions = {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false,
+          position: 'bottom',
+        },
+      },
+    }
     return () =>
       h(Bar, {
         chartOptions,
