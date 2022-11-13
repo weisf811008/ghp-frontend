@@ -47,6 +47,11 @@ const getAbnormalItemsData = async () => {
   const startDate = startOfMonth(date)
   const endDate = endOfMonth(date)
   abnormalItems.value = await getAbnormalItems(startDate, endDate)
+  abnormalItems.value.labels = abnormalItems.value.labels.map((item, index) => {
+    if (item.length > 10) {
+      return item.slice(0, 10) + '...'
+    }
+  })
 }
 
 onMounted(async () => {
